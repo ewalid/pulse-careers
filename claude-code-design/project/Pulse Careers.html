@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pulse — Careers Site</title>
+<meta name="viewport" content="width=1480" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --paper: #F4EDE1;
+    --paper-2: #EDE3D2;
+    --paper-3: #E4D7BF;
+    --ink: #2A1F2E;
+    --ink-2: #4A3C4F;
+    --ink-3: #75687A;
+    --coral: #FF7A5C;
+    --coral-soft: #FFB8A5;
+    --amber: #F4B942;
+    --mint: #7FD4C1;
+    --violet: #9B7FD4;
+    --line: rgba(42, 31, 46, 0.12);
+    --line-2: rgba(42, 31, 46, 0.06);
+    --cms: #7FD4C1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #1a1418; font-family: 'IBM Plex Sans', sans-serif; color: var(--ink); }
+  body {
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255,122,92,0.05), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(127,212,193,0.04), transparent 40%),
+      #1a1418;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+
+  /* grain texture */
+  .grain::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.35;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.12 0 0 0 0 0.18 0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="src/tokens.jsx"></script>
+  <script type="text/babel" src="src/primitives.jsx"></script>
+  <script type="text/babel" src="src/chrome.jsx"></script>
+  <script type="text/babel" src="src/homepage.jsx"></script>
+  <script type="text/babel" src="src/results.jsx"></script>
+  <script type="text/babel" src="src/jd.jsx"></script>
+  <script type="text/babel" src="src/brand.jsx"></script>
+  <script type="text/babel" src="src/designsystem.jsx"></script>
+  <script type="text/babel" src="src/app.jsx"></script>
+</body>
+</html>
