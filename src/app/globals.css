@@ -1,1 +1,58 @@
-@import 'https://a.storyblok.com/f/212319/x/e6ccda03b8/blueprint-blank.css';
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Colors — Paper */
+  --paper: #F4EDE1;
+  --paper2: #EDE3D2;
+  --paper3: #E4D7BF;
+
+  /* Colors — Ink */
+  --ink: #2A1F2E;
+  --ink2: #4A3C4F;
+  --ink3: #75687A;
+
+  /* Colors — Accents */
+  --coral: #FF7A5C;
+  --coral-soft: #FFB8A5;
+  --amber: #F4B942;
+  --mint: #7FD4C1;
+  --violet: #9B7FD4;
+
+  /* Borders */
+  --line: rgba(42, 31, 46, 0.12);
+  --line2: rgba(42, 31, 46, 0.06);
+
+  /* Typography */
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --font-body: var(--font-body);
+
+  /* Layout */
+  --container: 1280px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-default: 14px;
+  --radius-card: 16px;
+  --radius-pill: 99px;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

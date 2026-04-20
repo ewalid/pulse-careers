@@ -2,6 +2,12 @@ import Page from '@/components/Page';
 import Feature from '@/components/Feature';
 import Grid from '@/components/Grid';
 import Teaser from '@/components/Teaser';
+import HeroBlock from '@/components/blocks/HeroBlock';
+import DisciplineCards from '@/components/blocks/DisciplineCards';
+import BrandMarquee from '@/components/blocks/BrandMarquee';
+import EmployeeStories from '@/components/blocks/EmployeeStories';
+import GlobalNav from '@/components/blocks/GlobalNav';
+import FooterBlock from '@/components/blocks/FooterBlock';
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
 export const getStoryblokApi = storyblokInit({
@@ -12,11 +18,15 @@ export const getStoryblokApi = storyblokInit({
 		feature: Feature,
 		grid: Grid,
 		teaser: Teaser,
+		hero_block: HeroBlock,
+		discipline_cards: DisciplineCards,
+		brand_marquee: BrandMarquee,
+		employee_stories: EmployeeStories,
+		global_nav: GlobalNav,
+		footer_block: FooterBlock,
 	},
 	apiOptions: {
-		/** Set the correct region for your space. Learn more: https://www.storyblok.com/docs/packages/storyblok-js#example-region-parameter */
 		region: process.env.STORYBLOK_REGION || 'eu',
-		/** The following code is only required when creating a Storyblok space directly via the Blueprints feature. */
 		endpoint: process.env.STORYBLOK_API_BASE_URL
 			? `${new URL(process.env.STORYBLOK_API_BASE_URL).origin}/v2`
 			: undefined,
