@@ -1,6 +1,7 @@
 'use client';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import PulseLogo from '@/components/ui/PulseLogo';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 const LINK_COLS = [
   { title: 'Careers', items: ['Open roles', 'Teams', 'Internships', 'Returners', 'Referrals'] },
@@ -9,6 +10,7 @@ const LINK_COLS = [
 ];
 
 export default function FooterBlock({ blok }) {
+  const isMobile = useIsMobile();
   const tagline = blok?.tagline || 'Building the infrastructure of everyday intelligence.';
   const offices = blok?.offices || 'NYC · LDN · LIS · BER · SGP · SF · RMT';
 
@@ -17,7 +19,7 @@ export default function FooterBlock({ blok }) {
       {...(blok ? storyblokEditable(blok) : {})}
       style={{
         background: 'var(--ink)', color: 'var(--paper)',
-        padding: '60px 48px 36px', position: 'relative', overflow: 'hidden',
+        padding: isMobile ? '48px 20px 32px' : '60px 48px 36px', position: 'relative', overflow: 'hidden',
       }}
     >
       {/* Decorative blob */}
@@ -36,9 +38,9 @@ export default function FooterBlock({ blok }) {
 
       <div style={{ maxWidth: 'var(--container)', margin: '0 auto', position: 'relative', zIndex: 2 }}>
         {/* Main grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 48 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? 32 : 48 }}>
           {/* Brand column */}
-          <div>
+          <div style={isMobile ? { gridColumn: '1 / -1' } : {}}>
             <PulseLogo size={20} color="var(--paper)" />
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 500,
@@ -82,12 +84,14 @@ export default function FooterBlock({ blok }) {
 
         {/* Bottom bar */}
         <div style={{
-          borderTop: '1px solid rgba(244,237,225,0.1)', marginTop: 52, paddingTop: 22,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          borderTop: '1px solid rgba(244,237,225,0.1)', marginTop: isMobile ? 36 : 52, paddingTop: 22,
+          display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center',
+          gap: isMobile ? 14 : 0,
           fontFamily: 'var(--font-mono)', fontSize: 11, opacity: 0.45, letterSpacing: 0.5,
         }}>
           <div>© 2026 PULSE SYSTEMS, INC. · ALL RIGHTS RESERVED</div>
-          <div style={{ display: 'flex', gap: 20 }}>
+          <div style={{ display: 'flex', gap: isMobile ? 14 : 20, flexWrap: 'wrap' }}>
             {['Privacy', 'Terms', 'Accessibility', 'Candidate Privacy'].map(l => (
               <a key={l} href="#" style={{ color: 'var(--paper)', textDecoration: 'none' }}>{l.toUpperCase()}</a>
             ))}

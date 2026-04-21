@@ -1,5 +1,7 @@
 'use client';
 import { storyblokEditable } from '@storyblok/react/rsc';
+import { useIsMobile } from '@/lib/useIsMobile';
+import { accentHeadline } from '@/lib/accentHeadline';
 
 const ACCENT_COLORS = { coral: '#FF7A5C', mint: '#7FD4C1', amber: '#F4B942' };
 
@@ -14,30 +16,33 @@ function initials(name) {
 }
 
 export default function EmployeeStories({ blok }) {
+  const isMobile = useIsMobile();
   const stories = blok?.stories?.length > 0 ? blok.stories : DEFAULT_STORIES;
   const ctaIntro = blok?.cta_intro || 'READ 42 MORE STORIES — VIDEO, AUDIO, WRITTEN';
   const ctaLabel = blok?.cta_label || 'Pulse Stories →';
   const ctaUrl = blok?.cta_url || '#';
 
   return (
-    <section {...storyblokEditable(blok)} style={{ background: 'var(--paper)', padding: '80px 48px' }}>
+    <section {...storyblokEditable(blok)} style={{ background: 'var(--paper)', padding: isMobile ? '48px 20px' : '80px 48px' }}>
       <div style={{ maxWidth: 'var(--container)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'flex-end', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 16 : 0, marginBottom: 40 }}>
           <div>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 10 }}>
-              § 02 · Voices
+              {blok?.eyebrow || 'Voices'}
             </p>
-            <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 44, fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--ink)', maxWidth: 680, lineHeight: 1.1 }}>
-              {blok?.headline || <>Stories from people who <em style={{ color: 'var(--coral)' }}>stayed</em>.</>}
+            <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: isMobile ? 32 : 44, fontWeight: 600, letterSpacing: '-0.03em', color: 'var(--ink)', maxWidth: 680, lineHeight: 1.05 }}>
+              {accentHeadline(blok?.headline || 'Stories from people who stayed.', blok?.headline_accent_word || 'stayed')}
             </h2>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink)', background: 'transparent', border: '1px solid var(--line)', borderRadius: '99px', padding: '8px 14px', cursor: 'pointer' }}>←</button>
-            <button style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink)', background: 'transparent', border: '1px solid var(--line)', borderRadius: '99px', padding: '8px 14px', cursor: 'pointer' }}>→</button>
-          </div>
+          {!isMobile && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink)', background: 'transparent', border: '1px solid var(--line)', borderRadius: '99px', padding: '8px 14px', cursor: 'pointer' }}>←</button>
+              <button style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink)', background: 'transparent', border: '1px solid var(--line)', borderRadius: '99px', padding: '8px 14px', cursor: 'pointer' }}>→</button>
+            </div>
+          )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 18, marginBottom: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr 1fr', gap: 18, marginBottom: 24 }}>
           {stories.map((s, i) => {
             const accent = ACCENT_COLORS[s.accent_color] || '#FF7A5C';
             const isFeatured = s.featured === true || s.featured === 'true';

@@ -1,6 +1,9 @@
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { getStoryblokApi } from '@/lib/storyblok';
 
+// Always fetch fresh — prevents Next.js from caching Storyblok responses
+export const dynamic = 'force-dynamic';
+
 export default async function Page({ params }) {
 	const { slug } = await params;
 
