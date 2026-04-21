@@ -4,8 +4,8 @@ import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
 
-const CATEGORIES = ['Engineering', 'Data Science', 'AI & Research', 'Operations', 'Design'];
-const LOCATIONS = ['Remote EU', 'Lisbon', 'Berlin', 'NYC', 'London', 'Singapore', 'Remote Global'];
+const CATEGORIES = ['Engineering', 'AI & Research', 'Data Science', 'Design', 'Operations'];
+const LOCATIONS = ['Lisbon, PT', 'Berlin, DE', 'Remote EU', 'Remote Global', 'London, UK', 'NYC, US'];
 const AVATAR_COLORS = ['#FF7A5C', '#F4B942', '#7FD4C1', '#9B7FD4'];
 
 function isValidEmail(v) {
@@ -144,9 +144,27 @@ function MultiSelectDropdown({ label, options, selected, onToggle, accent = '#FF
 export default function JobAlerts({ blok }) {
   const isMobile = useIsMobile();
   const [email, setEmail] = useState('');
-  const [selectedCats, setSelectedCats] = useState([]);
-  const [selectedLocs, setSelectedLocs] = useState([]);
+  const [selectedCats, setSelectedCats] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    const d = new URLSearchParams(window.location.search).get('d');
+    return d ? d.split(',').filter(v => CATEGORIES.includes(v)) : [];
+  });
+  const [selectedLocs, setSelectedLocs] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    const l = new URLSearchParams(window.location.search).get('l');
+    return l ? l.split(',').filter(v => LOCATIONS.includes(v)) : [];
+  });
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    function handler(e) {
+      const { disciplines, locations } = e.detail;
+      if (disciplines.length) setSelectedCats(disciplines.filter(v => CATEGORIES.includes(v)));
+      if (locations.length) setSelectedLocs(locations.filter(v => LOCATIONS.includes(v)));
+    }
+    window.addEventListener('pulsefilters', handler);
+    return () => window.removeEventListener('pulsefilters', handler);
+  }, []);
 
   const valid = isValidEmail(email) && selectedCats.length > 0 && selectedLocs.length > 0;
 
