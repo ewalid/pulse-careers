@@ -123,7 +123,7 @@ function EditorialCard({ pick, job }) {
             >
               <BookmarkIcon filled={saved} />
             </button>
-            <a href="#" style={{
+            <a href={`/jobs/${job.id}`} style={{
               fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
               color: tone.btnText, background: tone.btn, textDecoration: 'none',
               borderRadius: 99, padding: '9px 18px',
@@ -147,7 +147,7 @@ export default function JobSuggestions({ blok }) {
   const headlineAccent = blok?.headline_accent_word || 'worth a look';
   const subtitle = blok?.subtitle || 'Curated weekly by the talent team · 247 open roles in total';
   const ctaLabel = blok?.cta_label || 'All 247 roles';
-  const ctaUrl = blok?.cta_url || '#';
+  const ctaUrl = blok?.cta_url || '/jobs';
 
   const jobsById = Object.fromEntries(JOBS.map(j => [j.id, j]));
   const picks = EDITORIAL_PICKS.map(p => ({ pick: p, job: jobsById[p.jobId] })).filter(({ job }) => !!job);

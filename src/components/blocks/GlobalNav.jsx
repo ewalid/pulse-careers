@@ -17,7 +17,7 @@ export default function GlobalNav({ blok }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navItems = blok?.nav_items?.length > 0 ? blok.nav_items : DEFAULT_NAV_ITEMS;
   const openRoles = blok?.open_roles_count || '247';
-  const jobsUrl = blok?.jobs_url || '#';
+  const jobsUrl = blok?.jobs_url || '/jobs';
   const savedJobsUrl = blok?.saved_jobs_url || '#';
 
   return (

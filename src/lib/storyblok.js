@@ -11,6 +11,8 @@ import FooterBlock from '@/components/blocks/FooterBlock';
 import JobAlerts from '@/components/blocks/JobAlerts';
 import JobSuggestions from '@/components/blocks/JobSuggestions';
 import WhoWeAre from '@/components/blocks/WhoWeAre';
+import JobsSearch from '@/components/blocks/JobsSearch';
+import JobList from '@/components/blocks/JobList';
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
 export const getStoryblokApi = storyblokInit({
@@ -30,6 +32,9 @@ export const getStoryblokApi = storyblokInit({
 		job_alerts: JobAlerts,
 		job_suggestions: JobSuggestions,
 		who_we_are: WhoWeAre,
+		jobs_search: JobsSearch,
+		job_list: JobList,
+		global_config: () => null,
 	},
 	apiOptions: {
 		region: process.env.STORYBLOK_REGION || 'eu',

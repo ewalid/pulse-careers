@@ -4,6 +4,7 @@ import StoryblokProvider from '@/components/StoryblokProvider';
 import { getStoryblokApi } from '@/lib/storyblok';
 import GlobalNav from '@/components/blocks/GlobalNav';
 import FooterBlock from '@/components/blocks/FooterBlock';
+import JobAlerts from '@/components/blocks/JobAlerts';
 
 const spaceGrotesk = Space_Grotesk({
 	subsets: ['latin'],
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }) {
 	const globals = await getGlobals();
 	const headerBlok = globals?.header?.[0] ?? null;
 	const footerBlok = globals?.footer?.[0] ?? null;
+	const jobAlertsBlok = globals?.job_alerts?.[0] ?? {};
 
 	return (
 		<StoryblokProvider>
@@ -69,6 +71,7 @@ export default async function RootLayout({ children }) {
 				<body>
 					<GlobalNav blok={headerBlok} />
 					{children}
+					<JobAlerts blok={jobAlertsBlok} />
 					<FooterBlock blok={footerBlok} />
 				</body>
 			</html>

@@ -183,6 +183,7 @@ export default function HeroBlock({ blok }) {
                   onChange={e => setQuery(e.target.value)}
                   onFocus={() => setFocused(true)}
                   onBlur={() => setFocused(false)}
+                  onKeyDown={e => { if (e.key === 'Enter') window.location.href = `/jobs${query ? `?q=${encodeURIComponent(query)}` : ''}`; }}
                   placeholder={displayPlaceholder}
                   style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'var(--font-body)', fontSize: 16, color: '#F4EDE1', lineHeight: 1.5, padding: '4px 0 12px', boxSizing: 'border-box' }}
                 />
@@ -217,7 +218,9 @@ export default function HeroBlock({ blok }) {
                       </button>
                     </div>
                   )}
-                  <button style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#2A1F2E', background: 'linear-gradient(135deg, #FF7A5C, #F4B942)', border: 'none', borderRadius: '99px', padding: '9px 18px', cursor: 'pointer', letterSpacing: '-0.01em', alignSelf: isMobile ? 'flex-end' : 'auto' }}>
+                  <button
+                    onClick={() => window.location.href = `/jobs${query ? `?q=${encodeURIComponent(query)}` : ''}`}
+                    style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#2A1F2E', background: 'linear-gradient(135deg, #FF7A5C, #F4B942)', border: 'none', borderRadius: '99px', padding: '9px 18px', cursor: 'pointer', letterSpacing: '-0.01em', alignSelf: isMobile ? 'flex-end' : 'auto' }}>
                     {blok?.cta_label || 'Ask Pulse'} →
                   </button>
                 </div>
