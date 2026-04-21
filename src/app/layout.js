@@ -25,9 +25,21 @@ const ibmPlexSans = IBM_Plex_Sans({
 
 export const metadata = {
 	title: 'Pulse Careers',
-	description: 'Find where you belong. Build what\'s next.',
+	description: 'Find where you belong. Build what\'s next. 247 open roles across Engineering, AI, Design, and more.',
 	icons: {
 		icon: '/favicon.svg',
+	},
+	openGraph: {
+		title: 'Pulse Careers',
+		description: 'Find where you belong. Build what\'s next.',
+		url: 'https://careers.pulse.com',
+		siteName: 'Pulse Careers',
+		type: 'website',
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Pulse Careers',
+		description: 'Find where you belong. Build what\'s next.',
 	},
 };
 
