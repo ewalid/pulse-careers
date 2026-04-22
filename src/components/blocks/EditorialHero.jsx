@@ -155,14 +155,33 @@ export default function EditorialHero({ blok }) {
             }}>
               {lines.map((line, i) => {
                 const accentColor = LINE_ACCENTS[i] || LINE_ACCENTS[0];
-                const accent = accentWords[i];
 
-                // If an accent word is set and appears in this line, use it
-                if (accent && line.includes(accent)) {
-                  const parts = line.split(accent);
+                // Collect all accent words that appear in this line
+                const lineAccents = accentWords
+                  .map((word, wi) => word && line.includes(word) ? { word, color: LINE_ACCENTS[wi] || LINE_ACCENTS[0] } : null)
+                  .filter(Boolean);
+
+                if (lineAccents.length > 0) {
+                  // Split line by all accent words, preserving order
+                  const tokens = [];
+                  let remaining = line;
+                  let cursor = 0;
+                  const sorted = [...lineAccents].sort((a, b) => line.indexOf(a.word) - line.indexOf(b.word));
+                  for (const { word, color } of sorted) {
+                    const idx = remaining.indexOf(word);
+                    if (idx === -1) continue;
+                    if (idx > 0) tokens.push({ text: remaining.slice(0, idx), accent: false });
+                    tokens.push({ text: word, accent: true, color });
+                    remaining = remaining.slice(idx + word.length);
+                  }
+                  if (remaining) tokens.push({ text: remaining, accent: false });
                   return (
                     <span key={i} style={{ display: 'block' }}>
-                      {parts[0]}<em style={{ fontStyle: 'italic', color: accentColor }}>{accent}</em>{parts.slice(1).join(accent)}
+                      {tokens.map((t, j) =>
+                        t.accent
+                          ? <em key={j} style={{ fontStyle: 'italic', color: t.color }}>{t.text}</em>
+                          : t.text
+                      )}
                     </span>
                   );
                 }

@@ -79,20 +79,17 @@ export default function EditorialLifestyle({ blok }) {
 
             <div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 36, color: '#7FD4C1', lineHeight: 1, marginBottom: 16, opacity: 0.6 }}>"</div>
-              <div
-                suppressHydrationWarning
-                style={{
-                  margin: '0 0 32px',
-                  fontFamily: 'var(--font-display)', fontSize: isMobile ? 18 : 22,
-                  fontWeight: 500, color: 'var(--paper)', lineHeight: 1.45,
-                  letterSpacing: '-0.01em',
-                }}
-                {...(pullQuoteHtml
-                  ? { dangerouslySetInnerHTML: { __html: pullQuoteHtml } }
-                  : {})}
-              >
-                {!pullQuoteHtml && pullQuotePlain}
-              </div>
+              {pullQuoteHtml ? (
+                <div
+                  suppressHydrationWarning
+                  style={{ margin: '0 0 32px', fontFamily: 'var(--font-display)', fontSize: isMobile ? 18 : 22, fontWeight: 500, color: 'var(--paper)', lineHeight: 1.45, letterSpacing: '-0.01em' }}
+                  dangerouslySetInnerHTML={{ __html: pullQuoteHtml }}
+                />
+              ) : (
+                <div style={{ margin: '0 0 32px', fontFamily: 'var(--font-display)', fontSize: isMobile ? 18 : 22, fontWeight: 500, color: 'var(--paper)', lineHeight: 1.45, letterSpacing: '-0.01em' }}>
+                  {pullQuotePlain}
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
