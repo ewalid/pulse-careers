@@ -5,6 +5,7 @@ import PulseLogo from '@/components/ui/PulseLogo';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { resolveLink } from '@/lib/resolveLink';
 import { useSavedJobs } from '@/lib/SavedJobsContext';
+import { TOTAL_JOBS } from '@/lib/ats-mock';
 
 const DEFAULT_NAV_ITEMS = [
   { label: 'Careers', url: '#' },
@@ -19,7 +20,7 @@ export default function GlobalNav({ blok }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { savedIds, openPanel } = useSavedJobs();
   const navItems = blok?.nav_items?.length > 0 ? blok.nav_items : DEFAULT_NAV_ITEMS;
-  const openRoles = blok?.open_roles_count || '247';
+  const openRoles = TOTAL_JOBS;
   const jobsUrl = resolveLink(blok?.jobs_url) || '/jobs';
 
   return (

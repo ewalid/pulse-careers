@@ -3,22 +3,25 @@ import { useState, useEffect, useRef } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import NeonBlob from '@/components/ui/NeonBlob';
 import { useIsMobile } from '@/lib/useIsMobile';
+import { TOTAL_JOBS, JOBS_BY_CATEGORY } from '@/lib/ats-mock';
+
+const MOCK_QUERY = "5 years as a software engineer, looking to transition into product management or anywhere my engineering background becomes the advantage";
 
 const DISCIPLINE_CHIPS = [
-  { label: 'Eng', count: 94 },
-  { label: 'AI', count: 47 },
-  { label: 'Ops', count: 41 },
-  { label: 'Data', count: 38 },
-  { label: 'Design', count: 27 },
+  { label: 'Eng',    count: JOBS_BY_CATEGORY['Engineering']   || 0, discipline: 'Engineering' },
+  { label: 'AI',     count: JOBS_BY_CATEGORY['AI & Research'] || 0, discipline: 'AI & Research' },
+  { label: 'Ops',    count: JOBS_BY_CATEGORY['Operations']    || 0, discipline: 'Operations' },
+  { label: 'Data',   count: JOBS_BY_CATEGORY['Data Science']  || 0, discipline: 'Data Science' },
+  { label: 'Design', count: JOBS_BY_CATEGORY['Design']        || 0, discipline: 'Design' },
 ];
 
 const HEADLINE_SIZES = { sm: '52px', md: '72px', lg: '96px', xl: '120px' };
 const SUBHEADLINE_SIZES = { sm: '40px', md: '52px', lg: '72px' };
 
 const SUGGESTIONS = [
-  { text: 'What roles fit an ex-biotech PM?', color: '#FF7A5C' },
-  { text: 'Teams hiring in Lisbon this quarter', color: '#7FD4C1' },
-  { text: 'Where will I grow fastest as IC?', color: '#F4B942' },
+  { text: 'What roles fit an ex-biotech PM?', color: '#FF7A5C', key: 'biotech-pm' },
+  { text: 'Teams hiring in Lisbon this quarter', color: '#7FD4C1', key: 'lisbon' },
+  { text: 'Where will I grow fastest as IC?', color: '#F4B942', key: 'ic-growth' },
 ];
 
 function WordReveal({ text, baseDelay = 0, style = {}, accentWord = '' }) {
@@ -89,8 +92,39 @@ function useTypingPlaceholder(suggestions, active) {
 export default function HeroBlock({ blok }) {
   const isMobile = useIsMobile();
   const [query, setQuery] = useState('');
+  const [queryChip, setQueryChip] = useState(false);
+  const [suggestionKey, setSuggestionKey] = useState('eng-to-pm');
   const [focused, setFocused] = useState(false);
-  const openRoles = blok?.stats_open_roles || 247;
+  const [resumeAttached, setResumeAttached] = useState(false);
+  const [linkedinConnected, setLinkedinConnected] = useState(false);
+  const typewriterRef = useRef(null);
+  const openRoles = TOTAL_JOBS;
+
+  function startTypewriter() {
+    clearInterval(typewriterRef.current);
+    typewriterRef.current = null;
+    setQueryChip(false);
+    setQuery('');
+    let i = 0;
+    typewriterRef.current = setInterval(() => {
+      i++;
+      setQuery(MOCK_QUERY.slice(0, i));
+      if (i >= MOCK_QUERY.length) {
+        clearInterval(typewriterRef.current);
+        typewriterRef.current = null;
+        setTimeout(() => setQueryChip(true), 400);
+      }
+    }, 22);
+  }
+
+  function clearSearch() {
+    clearInterval(typewriterRef.current);
+    typewriterRef.current = null;
+    setQuery('');
+    setQueryChip(false);
+  }
+
+  useEffect(() => () => clearInterval(typewriterRef.current), []);
   const headlineSize = isMobile ? '48px' : (HEADLINE_SIZES[blok?.headline_size] || '96px');
   const subheadlineSize = isMobile ? '36px' : (SUBHEADLINE_SIZES[blok?.subheadline_size] || '72px');
   const hudLocation = blok?.hud_location || 'PULSE / 2026  ·  LIVE FROM LISBON HQ  ·  38.72°N  ·  9.14°W';
@@ -177,21 +211,39 @@ export default function HeroBlock({ blok }) {
                   </span>
                 </div>
 
-                <input
-                  type="text"
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
+                <div
+                  tabIndex={0}
                   onFocus={() => setFocused(true)}
                   onBlur={() => setFocused(false)}
-                  onKeyDown={e => { if (e.key === 'Enter') window.location.href = `/jobs${query ? `?q=${encodeURIComponent(query)}` : ''}`; }}
-                  placeholder={displayPlaceholder}
-                  style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'var(--font-body)', fontSize: 16, color: '#F4EDE1', lineHeight: 1.5, padding: '4px 0 12px', boxSizing: 'border-box' }}
-                />
+                  onClick={() => {}}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (queryChip) window.location.href = `/jobs?ai=${suggestionKey}`;
+                      else startTypewriter();
+                    } else if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
+                      e.preventDefault();
+                      startTypewriter();
+                    }
+                  }}
+                  style={{ padding: '4px 0 12px', cursor: 'text', outline: 'none', minHeight: 28 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1.5, color: 'rgba(244,237,225,0.45)', flexShrink: 0, textTransform: 'uppercase' }}>Search</span>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: 1.5, flex: 1, wordBreak: 'break-word', color: query ? '#F4EDE1' : 'rgba(244,237,225,0.35)' }}>
+                      {query || displayPlaceholder}
+                      {query && !queryChip && <span style={{ display: 'inline-block', width: 2, height: '1em', background: '#FF7A5C', marginLeft: 2, verticalAlign: 'text-bottom', animation: 'blink-cursor 0.9s step-end infinite' }} />}
+                    </span>
+                    {queryChip && (
+                      <button onClick={clearSearch} style={{ background: 'none', border: 'none', color: 'rgba(244,237,225,0.45)', cursor: 'pointer', padding: '0 2px', fontSize: 20, lineHeight: 1, flexShrink: 0 }}>×</button>
+                    )}
+                  </div>
+                </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'nowrap' }}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'rgba(244,237,225,0.4)', textTransform: 'uppercase', flexShrink: 0 }}>TRY:</span>
                   {(isMobile ? SUGGESTIONS.slice(0, 2) : SUGGESTIONS).map(s => (
-                    <button key={s.text} onClick={() => setQuery(s.text)} style={{
+                    <button key={s.text} onClick={() => { clearInterval(typewriterRef.current); setQuery(s.text); setQueryChip(true); setSuggestionKey(s.key); }} style={{
                       fontFamily: 'var(--font-mono)', fontSize: 10, color: s.color,
                       background: `${s.color}18`, border: `1px solid ${s.color}44`,
                       borderRadius: '99px', padding: '5px 12px', cursor: 'pointer', whiteSpace: 'nowrap',
@@ -208,19 +260,46 @@ export default function HeroBlock({ blok }) {
                 <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: 8, flexDirection: isMobile ? 'column' : 'row' }}>
                   {!isMobile && (
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 0.5, color: 'rgba(244,237,225,0.7)', background: 'rgba(244,237,225,0.08)', border: '1px solid rgba(244,237,225,0.12)', borderRadius: '99px', padding: '6px 12px', cursor: 'pointer' }}>
-                        ⊗ Attach résumé
+                      <button
+                        onClick={() => setResumeAttached(true)}
+                        style={{
+                          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 0.5,
+                          color: resumeAttached ? '#7FD4C1' : 'rgba(244,237,225,0.7)',
+                          background: resumeAttached ? 'rgba(127,212,193,0.12)' : 'rgba(244,237,225,0.08)',
+                          border: `1px solid ${resumeAttached ? 'rgba(127,212,193,0.35)' : 'rgba(244,237,225,0.12)'}`,
+                          borderRadius: '99px', padding: '6px 12px', cursor: resumeAttached ? 'default' : 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {resumeAttached ? '✓ résumé.pdf' : '⊗ Résumé'}
                       </button>
-                      <button style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 0.5, color: 'rgba(244,237,225,0.7)', background: 'rgba(244,237,225,0.08)', border: '1px solid rgba(244,237,225,0.12)', borderRadius: '99px', padding: '6px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-                        Attach LinkedIn profile
+                      <button
+                        onClick={() => setLinkedinConnected(true)}
+                        style={{
+                          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 0.5,
+                          color: linkedinConnected ? '#7FD4C1' : 'rgba(244,237,225,0.7)',
+                          background: linkedinConnected ? 'rgba(127,212,193,0.12)' : 'rgba(244,237,225,0.08)',
+                          border: `1px solid ${linkedinConnected ? 'rgba(127,212,193,0.35)' : 'rgba(244,237,225,0.12)'}`,
+                          borderRadius: '99px', padding: '6px 12px', cursor: linkedinConnected ? 'default' : 'pointer',
+                          display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.2s',
+                        }}
+                      >
+                        {linkedinConnected
+                          ? '✓ LinkedIn connected'
+                          : (<><svg width="12" height="12" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn profile</>)}
                       </button>
                     </div>
                   )}
                   <button
-                    onClick={() => window.location.href = `/jobs${query ? `?q=${encodeURIComponent(query)}` : ''}`}
+                    onClick={() => {
+                      if (queryChip) {
+                        window.location.href = `/jobs?ai=${suggestionKey}`;
+                      } else {
+                        startTypewriter();
+                      }
+                    }}
                     style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: '#2A1F2E', background: 'linear-gradient(135deg, #FF7A5C, #F4B942)', border: 'none', borderRadius: '99px', padding: '9px 18px', cursor: 'pointer', letterSpacing: '-0.01em', alignSelf: isMobile ? 'flex-end' : 'auto' }}>
-                    {blok?.cta_label || 'Ask Pulse'} →
+                    {queryChip ? 'Find my roles' : (blok?.cta_label || 'Ask Pulse')} →
                   </button>
                 </div>
               </div>
@@ -234,10 +313,22 @@ export default function HeroBlock({ blok }) {
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'rgba(244,237,225,0.55)', fontWeight: 400 }}>open roles</span>
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {DISCIPLINE_CHIPS.map(({ label, count }) => (
-                  <div key={label} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, padding: '4px 9px', background: 'rgba(244,237,225,0.12)', borderRadius: '99px', letterSpacing: 0.5, color: '#F4EDE1' }}>
+                {DISCIPLINE_CHIPS.map(({ label, count, discipline }) => (
+                  <a
+                    key={label}
+                    href={`/jobs?d=${encodeURIComponent(discipline)}`}
+                    style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 10, padding: '4px 9px',
+                      background: 'rgba(244,237,225,0.12)', borderRadius: '99px',
+                      letterSpacing: 0.5, color: '#F4EDE1', textDecoration: 'none',
+                      cursor: 'pointer', transition: 'background 0.15s',
+                      display: 'inline-block',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,237,225,0.22)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(244,237,225,0.12)'; }}
+                  >
                     {label} <b style={{ color: '#FF7A5C' }}>{count}</b>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>}
@@ -248,6 +339,7 @@ export default function HeroBlock({ blok }) {
 
       <style>{`
         @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }
+        @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes word-in { to { opacity:1; transform:translateY(0); } }
         @keyframes fade-up { to { opacity:1; transform:translateY(0); } }
         input::placeholder { color: rgba(244,185,66,0.35); }

@@ -65,7 +65,7 @@ export default function OGImage() {
             <span style={{ color: '#FF7A5C', fontStyle: 'italic', marginLeft: 16 }}>belong.</span>
           </div>
           <div style={{ fontSize: 24, color: 'rgba(244,237,225,0.55)', fontWeight: 400, letterSpacing: '-0.01em' }}>
-            247 open roles · Lisbon, Berlin, NYC & remote
+            75 open roles · Lisbon, Berlin, NYC & remote
           </div>
         </div>
 

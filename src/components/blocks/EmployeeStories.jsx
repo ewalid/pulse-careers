@@ -21,7 +21,7 @@ export default function EmployeeStories({ blok }) {
   const stories = blok?.stories?.length > 0 ? blok.stories : DEFAULT_STORIES;
   const ctaIntro = blok?.cta_intro || 'READ 42 MORE STORIES — VIDEO, AUDIO, WRITTEN';
   const ctaLabel = blok?.cta_label || 'Pulse Stories →';
-  const ctaUrl = resolveLink(blok?.cta_url) || '#';
+  const ctaUrl = resolveLink(blok?.cta_url) || '/our-story';
 
   return (
     <section {...storyblokEditable(blok)} style={{ background: 'var(--paper)', padding: isMobile ? '48px 20px' : '80px 48px' }}>

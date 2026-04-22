@@ -1,7 +1,11 @@
 'use client';
+import { useState } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { resolveLink } from '@/lib/resolveLink';
+import { JOBS, JOBS_BY_CATEGORY } from '@/lib/ats-mock';
+import { useSavedJobs } from '@/lib/SavedJobsContext';
+import JobCard from '@/components/JobCard';
 
 const TONES = {
   coral:  { accent: '#FF7A5C', bgTint: '#FFD6C8' },
@@ -15,7 +19,7 @@ const DEFAULT_DATA = {
   tagline: 'We build tools that other engineers rely on.',
   tone: 'coral',
   stat_1_k: 'Engineers',     stat_1_v: '420',
-  stat_2_k: 'Open roles',    stat_2_v: '94',
+  stat_2_k: 'Open roles',    stat_2_v: String(JOBS_BY_CATEGORY['Engineering'] || 0),
   stat_3_k: 'Locations',     stat_3_v: '7',
   stat_4_k: 'Services shipped', stat_4_v: '1,240',
   mission_1: 'Pulse Engineering is the load-bearing wall of the company. We build the platforms, pipelines, and primitives that every other team depends on to move fast without breaking the people using our product.',
@@ -64,8 +68,20 @@ const DEFAULT_JOBS = [
   { title: 'Staff Database Engineer',               loc: 'Remote EU', type: 'Full-time · Remote',  salary: '€155–185k', tags: 'Postgres, Go' },
 ];
 
+// Map team names to job_category values in ats-mock
+const TEAM_TO_CATEGORY = {
+  'Engineering':   'Engineering',
+  'AI & Research': 'AI & Research',
+  'AI Research':   'AI & Research',
+  'Design':        'Design',
+  'Data Science':  'Data Science',
+  'Operations':    'Operations',
+};
+
 export default function TeamDetail({ blok }) {
   const isMobile = useIsMobile();
+  const { isSaved, toggleSave } = useSavedJobs();
+  const [hoveredId, setHoveredId] = useState(null);
 
   const name     = blok?.name    || DEFAULT_DATA.name;
   const tagline  = blok?.tagline || DEFAULT_DATA.tagline;
@@ -94,7 +110,10 @@ export default function TeamDetail({ blok }) {
   const rituals    = blok?.rituals?.length       ? blok.rituals      : DEFAULT_RITUALS;
   const ships      = blok?.ships?.length         ? blok.ships        : DEFAULT_SHIPS;
   const voices     = blok?.voices?.length        ? blok.voices       : DEFAULT_VOICES;
-  const jobs       = blok?.jobs?.length          ? blok.jobs         : DEFAULT_JOBS;
+
+  // Use real ATS jobs filtered by this team's category
+  const category = TEAM_TO_CATEGORY[name] || name;
+  const teamJobs = JOBS.filter(j => j.job_category === category).slice(0, 5);
 
   const leadName   = blok?.lead_name   || DEFAULT_DATA.lead_name;
   const leadRole   = blok?.lead_role   || DEFAULT_DATA.lead_role;
@@ -314,49 +333,33 @@ export default function TeamDetail({ blok }) {
             <div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--ink3)', textTransform: 'uppercase', marginBottom: 10 }}>§ 06 · Open roles</div>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 36 : 56, fontWeight: 600, letterSpacing: '-0.03em', color: 'var(--ink)', lineHeight: 1.05, margin: 0 }}>
-                {jobs.length} of {openCount} roles.
+                {teamJobs.length} open in {name}.
               </h2>
             </div>
-            <a href={`/jobs?team=${(blok?.name || 'engineering').toLowerCase().replace(/\s+/g, '-')}`}
+            <a href={`/jobs?d=${encodeURIComponent(category)}`}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, color: 'var(--paper)', backgroundColor: 'var(--ink)', padding: '14px 24px', borderRadius: 99, letterSpacing: '-0.01em', textDecoration: 'none', transition: 'transform 200ms ease' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateX(2px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'translateX(0)'}
             >
-              See all {openCount} {name} roles →
+              See all {name} roles →
             </a>
           </div>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {jobs.map((j, i) => {
-              const jTitle  = j.title  || j.content?.title  || '';
-              const jLoc    = j.loc    || j.content?.loc    || '';
-              const jType   = j.type   || j.content?.type   || '';
-              const jSalary = j.salary || j.content?.salary || '';
-              const jTagsRaw = j.tags  || j.content?.tags   || '';
-              const jTags = typeof jTagsRaw === 'string' ? jTagsRaw.split(',').map(t => t.trim()).filter(Boolean) : (Array.isArray(jTagsRaw) ? jTagsRaw : []);
-              return (
-                <a key={j._uid || i} href="#"
-                  style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '40px 1.8fr 1fr 1fr auto', gap: isMobile ? 10 : 24, padding: isMobile ? 20 : '22px 28px', backgroundColor: 'var(--paper)', border: '1px solid var(--line)', borderRadius: 14, alignItems: 'center', transition: 'transform 180ms ease, border-color 180ms ease, background 180ms ease', textDecoration: 'none' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.backgroundColor = bgTint + '44'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.backgroundColor = 'var(--paper)'; e.currentTarget.style.transform = 'translateX(0)'; }}
-                >
-                  {!isMobile && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink3)' }}>{String(i + 1).padStart(2, '0')}</div>}
-                  <div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 17 : 18, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.01em', lineHeight: 1.3, marginBottom: isMobile ? 8 : 6 }}>{jTitle}</div>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {jTags.map(tag => (
-                        <span key={tag} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, padding: '3px 9px', backgroundColor: bgTint + 'AA', color: 'var(--ink2)', borderRadius: 99, letterSpacing: 0.5 }}>{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink2)' }}>
-                    <div style={{ fontWeight: 600 }}>{jLoc}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink3)', marginTop: 2 }}>{jType}</div>
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 15 : 17, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.01em' }}>{jSalary}</div>
-                  {!isMobile && <div style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: accent, whiteSpace: 'nowrap' }}>Apply →</div>}
-                </a>
-              );
-            })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {teamJobs.map(job => (
+              <JobCard
+                key={job.id}
+                job={job}
+                bookmarked={isSaved(job.id)}
+                onBookmark={toggleSave}
+                showSalary
+                showDepartment={false}
+                showLocation
+                allowBookmark
+                hovered={hoveredId === job.id}
+                onHover={setHoveredId}
+                isMobile={isMobile}
+              />
+            ))}
           </div>
         </div>
       </section>

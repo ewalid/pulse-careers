@@ -113,7 +113,7 @@ export default function ApplyForm({ job }) {
   const responsibilities = (job.responsibilities || []).slice(0, 3);
 
   return (
-    <div style={{ background: 'var(--paper)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--paper)', minHeight: '100vh', paddingBottom: isMobile ? 80 : 0 }}>
 
       {/* Top bar */}
       <div style={{
@@ -378,7 +378,7 @@ export default function ApplyForm({ job }) {
           </div>
         </div>
 
-        {/* RIGHT: Sidebar */}
+        {/* RIGHT: Sidebar — desktop only */}
         {!isMobile && (
           <div style={{ padding: '40px 0 80px', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
@@ -448,6 +448,38 @@ export default function ApplyForm({ job }) {
           </div>
         )}
       </div>
+
+      {/* Mobile sticky CTA — always visible at bottom of viewport */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+          background: 'var(--paper)',
+          borderTop: '1px solid var(--line2)',
+          padding: '12px 20px',
+          display: 'flex', alignItems: 'center', gap: 12,
+          boxShadow: '0 -8px 24px rgba(42,31,46,0.08)',
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1, color: 'var(--ink3)', textTransform: 'uppercase' }}>Applying for</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {job.title}
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={remaining > 0}
+            style={{
+              fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
+              color: '#fff', background: remaining > 0 ? 'var(--line)' : '#FF7A5C',
+              border: 'none', borderRadius: 10, padding: '11px 20px',
+              cursor: remaining > 0 ? 'not-allowed' : 'pointer',
+              flexShrink: 0, whiteSpace: 'nowrap', transition: 'background 0.15s',
+            }}
+          >
+            {remaining > 0 ? `${remaining} left` : 'Submit →'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

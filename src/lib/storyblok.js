@@ -50,6 +50,7 @@ export const getStoryblokApi = storyblokInit({
 		job_list: JobList,
 		job_detail: JobDetail,
 		job_faq_item: () => null,
+		ai_suggestion_item: () => null,
 		team_member: () => null,
 		global_config: () => null,
 		editorial_hero: EditorialHero,

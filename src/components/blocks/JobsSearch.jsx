@@ -3,16 +3,17 @@ import { useState } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
+import { TOTAL_JOBS } from '@/lib/ats-mock';
 
 export default function JobsSearch({ blok, onSearch }) {
   const isMobile = useIsMobile();
   const [query, setQuery] = useState('');
 
   const eyebrow = blok?.eyebrow || 'CAREERS  ›  OPEN ROLES';
-  const headline = blok?.headline || '247 open roles.';
+  const headline = blok?.headline || `${TOTAL_JOBS} open roles.`;
   const subline = blok?.subline || 'Find yours in under a minute.';
   const accentWord = blok?.headline_accent_word || '';
-  const rawTags = blok?.popular_tags || 'ML Engineer\nStaff+\nRemote EMEA\nReturnship\nNew grad';
+  const rawTags = blok?.popular_tags || 'ML Engineer\nStaff+\nRemote EMEA\nInternship\nNew grad';
   const tags = rawTags.split('\n').map(t => t.trim()).filter(Boolean);
 
   function handleSearch(q) {

@@ -2,13 +2,14 @@
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { resolveLink } from '@/lib/resolveLink';
+import { TOTAL_JOBS } from '@/lib/ats-mock';
 
 export default function BrandCta({ blok }) {
   const isMobile = useIsMobile();
 
   const headline = blok?.headline || "If any of this sounds like home,\nlet's talk.";
   const accentWord = blok?.headline_accent || 'like home';
-  const primaryLabel = blok?.primary_cta_label || 'Browse 247 roles';
+  const primaryLabel = blok?.primary_cta_label || `Browse ${TOTAL_JOBS} roles`;
   const primaryUrl = resolveLink(blok?.primary_cta_url) || '/jobs';
   const secondaryLabel = blok?.secondary_cta_label || 'Join talent network';
   const secondaryUrl = resolveLink(blok?.secondary_cta_url) || '#alerts';

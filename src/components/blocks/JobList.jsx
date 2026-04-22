@@ -2,16 +2,77 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
-import { JOBS, timeAgo } from '@/lib/ats-mock';
+import { JOBS, TOTAL_JOBS, timeAgo } from '@/lib/ats-mock';
 import { accentHeadline } from '@/lib/accentHeadline';
 import { useSavedJobs } from '@/lib/SavedJobsContext';
+import SearchAIBanner from '@/components/SearchAIBanner';
+import JobCard, { TONE_COLORS } from '@/components/JobCard';
 
-const TONE_COLORS = {
-  coral: '#FF7A5C',
-  mint: '#7FD4C1',
-  amber: '#F4B942',
-  violet: '#9B7FD4',
-};
+export const MOCK_QUERY = "5 years as a software engineer, looking to transition into product management or anywhere my engineering background becomes the advantage";
+
+const SUGGESTION_RULES = [
+  {
+    key: 'eng-to-pm',
+    tone: 'violet',
+    test: (q) => q.length > 20 && /transition|product.manag|project.manag|program.manag|TPM|moving.into|switch|pivot|leadership.role|manag.*role/i.test(q) && /engineer|eng|software|technical|coding|developer/i.test(q),
+    filter: (jobs) => jobs.filter(j => /product manager|program manager|TPM|technical program|solutions engineer/i.test(j.title)).slice(0, 4),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'violet',
+      headline: 'Engineering to PM is a high-signal move — and the data backs it.',
+      body: "At Pulse, 18% of PM hires in the last two years came from engineering backgrounds. That's not a coincidence — research platform PMs who can read a pull request and a user interview in the same morning are rare. Your five years of engineering gives you two things most PM candidates don't have: a working model of how hard things are to build, and credibility with the engineers you'll depend on. The roles below are the ones where that combination is a genuine competitive advantage, not just a checkbox.",
+    },
+  },
+  {
+    key: 'customer-facing',
+    tone: 'violet',
+    test: (q) => /\b(customer.fac|devrel|developer.rel|solutions.eng|account.man|customer.suc|facing.role|facing\s+or|cs.+looking|master.+looking|tech.+customer)\b/i.test(q)
+      || (q.length > 30 && /customer|devrel|developer rel|solutions|account/i.test(q)),
+    filter: (jobs) => jobs.filter(j => /solutions|developer rel|devrel|customer success|account manager/i.test(j.title)),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'violet',
+      headline: 'Your engineering depth is exactly what customer-facing teams are hiring for.',
+      body: "Companies at Pulse's scale don't just want people who can present a demo — they need engineers who can debug a customer's integration live, architect a proof-of-concept on the spot, and speak peer-to-peer with a CTO. Five years of engineering and a CS master's is a rare combination in these roles. Most candidates either have the technical depth without the customer instinct, or the relationship skills without the credibility. The three roles below are the ones where your background is a genuine edge, not just a checkbox.",
+    },
+  },
+  {
+    key: 'biotech-pm',
+    tone: 'coral',
+    test: (q) => /\b(pm|product\s*manager|biotech|clinical|pharma|program\s*manager|tpm)\b/i.test(q),
+    filter: (jobs) => jobs.filter(j => /product|program/i.test(j.title)),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'coral',
+      headline: 'Your PM experience is valuable — and transferable here.',
+      body: 'Biotech PMs bring something rare to AI research: comfort with evidence gates, regulatory rigour, and stakeholder environments where scientists are the decision-makers. Those instincts translate directly to research platform and program management roles at Pulse. The three roles below are the ones where your background gives you the highest signal-to-noise ratio.',
+    },
+  },
+  {
+    key: 'lisbon',
+    tone: 'mint',
+    test: (q) => /\b(lisbon|quarter|this\s*quarter|hiring\s*in)\b/i.test(q),
+    filter: (jobs) => jobs.filter(j => j.location === 'Lisbon, PT'),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'mint',
+      headline: 'Lisbon is our fastest-growing hub right now.',
+      body: 'Three teams have open headcount in Lisbon this quarter, all with relocation packages and most with visa sponsorship. The Lisbon office runs on a hybrid model — 3 days in-office, coordinated by team — and sits 10 minutes from the city centre. Most of the founding engineering team is still here.',
+    },
+  },
+  {
+    key: 'ic-growth',
+    tone: 'amber',
+    test: (q) => /\b(ic|grow|fastest|individual\s*contributor|senior\s*to\s*staff|staff\s*to\s*principal|level\s*up)\b/i.test(q),
+    filter: (jobs) => jobs.filter(j => ['Senior', 'Staff', 'Principal'].includes(j.seniority)),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'amber',
+      headline: 'IC growth at Pulse is about leverage, not tenure.',
+      body: 'The fastest path from Senior to Staff here runs through ownership surface — how much of a system you control and how directly your work influences model quality or user experience. Based on current team structures and open headcount, these tracks offer the clearest IC runway without being pushed into management.',
+    },
+  },
+];
 
 const ALL_DISCIPLINES = ['Engineering', 'AI & Research', 'Data Science', 'Design', 'Operations'];
 const ALL_LOCATIONS = ['Lisbon, PT', 'Berlin, DE', 'Remote EU', 'Remote Global', 'London, UK', 'NYC, US'];
@@ -25,38 +86,6 @@ const SALARY_FLOORS_MAP = {
   '€165–195k': 165000, '€110–135k': 110000, '€180–210k': 180000,
   '£140–180k': 140000, '$130–155k': 130000, 'Competitive': 0,
 };
-
-function PinIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-    </svg>
-  );
-}
-
-function BriefcaseIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-    </svg>
-  );
-}
-
-function ClockIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-    </svg>
-  );
-}
-
-function BookmarkIcon({ filled }) {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-    </svg>
-  );
-}
 
 function FilterIcon() {
   return (
@@ -321,145 +350,6 @@ function SidebarContent({ disciplines, setDisciplines, locations, setLocations, 
   );
 }
 
-function JobCard({ job, bookmarked, onBookmark, showSalary, showDepartment, showLocation, allowBookmark, hovered, onHover }) {
-  const toneColor = TONE_COLORS[job.tone] || TONE_COLORS.coral;
-
-  return (
-    <div
-      onMouseEnter={() => onHover(job.id)}
-      onMouseLeave={() => onHover(null)}
-      style={{
-        background: hovered ? 'var(--paper)' : 'var(--paper)',
-        borderWidth: 1, borderStyle: 'solid', borderColor: 'var(--line2)',
-        borderRadius: 16, padding: '22px 26px',
-        display: 'grid',
-        gridTemplateColumns: '1fr auto auto auto',
-        gap: 24, alignItems: 'center',
-        position: 'relative', overflow: 'hidden',
-        boxShadow: hovered
-          ? `0 12px 40px -8px rgba(42,31,46,0.14), 0 2px 8px rgba(42,31,46,0.06)`
-          : '0 1px 3px rgba(42,31,46,0.04)',
-        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
-        transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease',
-      }}
-    >
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: hovered ? `linear-gradient(105deg, ${toneColor}0a 0%, transparent 55%)` : 'none',
-        pointerEvents: 'none', transition: 'background 0.2s',
-      }} />
-
-      <div style={{
-        position: 'absolute', left: 0, top: 0, bottom: 0,
-        width: hovered ? 4 : 3,
-        background: toneColor,
-        opacity: hovered ? 1 : 0.35,
-        transition: 'opacity 0.2s, width 0.2s',
-      }} />
-
-      <div style={{ position: 'relative', minWidth: 0 }}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
-          {showDepartment && (
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 0.5,
-              color: toneColor, background: `${toneColor}18`,
-              border: `1px solid ${toneColor}44`,
-              padding: '3px 9px', borderRadius: 99,
-            }}>
-              {job.job_category}
-            </span>
-          )}
-          {job.hot && (
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10,
-              color: '#FF7A5C', background: 'rgba(255,122,92,0.12)',
-              border: '1px solid rgba(255,122,92,0.3)',
-              padding: '3px 9px', borderRadius: 99,
-            }}>
-              ● High demand
-            </span>
-          )}
-          {job.new && (
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10,
-              color: '#7FD4C1', background: 'rgba(127,212,193,0.12)',
-              border: '1px solid rgba(127,212,193,0.3)',
-              padding: '3px 9px', borderRadius: 99,
-            }}>
-              New · {timeAgo(job.publication_date)}
-            </span>
-          )}
-          {job.match && (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#FF7A5C', fontWeight: 700, letterSpacing: 1 }}>
-              ● {job.match}% MATCH
-            </span>
-          )}
-        </div>
-
-        <div style={{
-          fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600,
-          letterSpacing: '-0.01em', color: 'var(--ink)', lineHeight: 1.2, marginBottom: 10,
-        }}>
-          {job.title}
-        </div>
-
-        <div style={{ display: 'flex', gap: 18, fontSize: 12, color: 'var(--ink2)', fontFamily: 'var(--font-body)', flexWrap: 'wrap' }}>
-          {showLocation && (
-            <span style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-              <PinIcon /> {job.location} · {job.work_mode}
-            </span>
-          )}
-          <span style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-            <BriefcaseIcon /> {job.contract_type}
-          </span>
-          <span style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-            <ClockIcon /> Posted {timeAgo(job.publication_date)}
-          </span>
-        </div>
-      </div>
-
-      {showSalary && (
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink3)', letterSpacing: 1 }}>SALARY</div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, marginTop: 2, color: 'var(--ink)' }}>
-            {job.salary || 'Competitive'}
-          </div>
-        </div>
-      )}
-
-      {allowBookmark && (
-        <button
-          onClick={() => onBookmark(job.id)}
-          style={{
-            background: 'transparent',
-            border: `1px solid ${bookmarked ? toneColor : 'var(--line)'}`,
-            color: bookmarked ? toneColor : 'var(--ink2)',
-            width: 40, height: 40, borderRadius: 99,
-            display: 'grid', placeItems: 'center',
-            cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s',
-          }}
-        >
-          <BookmarkIcon filled={bookmarked} />
-        </button>
-      )}
-
-      <a
-        href={`/jobs/${job.id}`}
-        style={{
-          fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
-          color: hovered ? 'var(--ink)' : 'var(--paper)',
-          background: hovered ? toneColor : 'var(--ink)',
-          border: 'none', borderRadius: 99, padding: '9px 18px',
-          cursor: 'pointer', textDecoration: 'none', letterSpacing: '-0.01em',
-          flexShrink: 0, transition: 'all 0.2s', whiteSpace: 'nowrap',
-        }}
-      >
-        View →
-      </a>
-    </div>
-  );
-}
-
 export default function JobList({ blok }) {
   const isMobile = useIsMobile();
 
@@ -469,17 +359,26 @@ export default function JobList({ blok }) {
   const allowBookmark = blok?.allow_bookmark !== false;
   const itemsPerPage = Number(blok?.items_per_page) || 8;
 
-  const headline = blok?.headline || '247 open roles.';
+  const headline = blok?.headline || `${TOTAL_JOBS} open roles.`;
   const subline = blok?.subline || 'Find yours in under a minute.';
   const accentWord = blok?.headline_accent_word || '';
   const eyebrow = blok?.eyebrow || 'CAREERS  ›  OPEN ROLES';
-  const rawTags = blok?.popular_tags || 'ML Engineer\nStaff+\nRemote EMEA\nReturnship\nNew grad';
+  const rawTags = blok?.popular_tags || 'ML Engineer\nStaff+\nRemote EMEA\nInternship\nNew grad';
   const popularTags = rawTags.split('\n').map(t => t.trim()).filter(Boolean);
 
-  const [search, setSearch] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    return new URLSearchParams(window.location.search).get('q') || '';
-  });
+  const [search, setSearch] = useState('');
+  const [heroSuggestionKey, setHeroSuggestionKey] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ai = params.get('ai');
+    const d = params.get('d');
+    const e = params.get('e');
+    if (ai) setHeroSuggestionKey(ai);
+    if (d) setDisciplines(d.split(',').filter(Boolean));
+    if (e) setEmployment(e.split(',').filter(Boolean));
+  }, []);
+
   const [disciplines, setDisciplines] = useState([]);
   const [locations, setLocations] = useState([]);
   const [seniorities, setSeniorities] = useState([]);
@@ -503,12 +402,36 @@ export default function JobList({ blok }) {
 
   const salaryFloor = SALARY_STEPS[salaryStep];
 
+  // Detect if the current search matches a known AI suggestion pattern
+  const matchedRule = useMemo(() => {
+    if (heroSuggestionKey) return SUGGESTION_RULES.find(r => r.key === heroSuggestionKey) || null;
+    if (!search) return null;
+    return SUGGESTION_RULES.find(r => r.test(search)) || null;
+  }, [search, heroSuggestionKey]);
+
+  // Resolve the AI suggestion: prefer CMS-authored version, fall back to default
+  const matchedSuggestion = useMemo(() => {
+    if (!matchedRule) return null;
+    const cmsSuggestions = blok?.ai_suggestions || [];
+    const cms = cmsSuggestions.find(s => {
+      const key = s.suggestion_key || s.content?.suggestion_key || '';
+      return key === matchedRule.key;
+    });
+    if (cms) return { ...matchedRule.defaultSuggestion, ...cms, ...cms.content };
+    return matchedRule.defaultSuggestion;
+  }, [matchedRule, blok]);
+
   const filtered = useMemo(() => {
     let jobs = JOBS;
-    if (search) {
+
+    if (matchedRule && (search || heroSuggestionKey)) {
+      // AI suggestion mode: use smart filter, ignore normal text search
+      jobs = matchedRule.filter(jobs);
+    } else if (search) {
       const q = search.toLowerCase();
       jobs = jobs.filter(j => j.title.toLowerCase().includes(q) || j.job_category.toLowerCase().includes(q));
     }
+
     if (disciplines.length) jobs = jobs.filter(j => disciplines.includes(j.job_category));
     if (locations.length) jobs = jobs.filter(j => locations.includes(j.location));
     if (seniorities.length) jobs = jobs.filter(j => seniorities.includes(j.seniority));
@@ -518,7 +441,7 @@ export default function JobList({ blok }) {
     if (sortBy === 'newest') return [...jobs].sort((a, b) => new Date(b.publication_date) - new Date(a.publication_date));
     if (sortBy === 'match') return [...jobs].sort((a, b) => (b.match || 0) - (a.match || 0));
     return jobs;
-  }, [search, disciplines, locations, seniorities, employment, salaryFloor, sortBy]);
+  }, [search, matchedRule, heroSuggestionKey, disciplines, locations, seniorities, employment, salaryFloor, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
   const currentPage = Math.min(page, totalPages);
@@ -531,11 +454,11 @@ export default function JobList({ blok }) {
     ...seniorities.map(v => ({ label: v, category: 'SENIORITY', color: '#9B7FD4', onRemove: () => { setSeniorities(p => p.filter(x => x !== v)); setPage(1); } })),
     ...employment.map(v => ({ label: v, category: 'WORK TYPE', color: '#7FD4C1', onRemove: () => { setEmployment(p => p.filter(x => x !== v)); setPage(1); } })),
     ...(salaryStep > 0 ? [{ label: SALARY_LABELS[salaryStep], category: 'SALARY', color: '#9B7FD4', onRemove: () => { setSalaryStep(0); setPage(1); } }] : []),
-    ...(search ? [{ label: search, category: 'SEARCH', color: 'var(--ink3)', onRemove: () => { setSearch(''); setPage(1); } }] : []),
   ];
 
   function handleSearch(q) {
     setSearch(q);
+    setHeroSuggestionKey(null);
     setPage(1);
   }
 
@@ -602,8 +525,8 @@ export default function JobList({ blok }) {
                 <input
                   type="text"
                   value={search}
-                  onChange={e => handleSearch(e.target.value)}
                   placeholder="Search roles, teams, skills…"
+                  onChange={e => handleSearch(e.target.value)}
                   style={{
                     flex: 1, border: 'none', outline: 'none', background: 'transparent',
                     fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink)', padding: '12px 0',
@@ -697,6 +620,11 @@ export default function JobList({ blok }) {
                 </div>
               )}
             </div>
+          )}
+
+          {/* AI suggestion banner */}
+          {matchedSuggestion && (
+            <SearchAIBanner query={search} suggestion={matchedSuggestion} />
           )}
 
           {/* Results header */}
@@ -802,6 +730,7 @@ export default function JobList({ blok }) {
                 allowBookmark={allowBookmark}
                 hovered={hoveredId === job.id}
                 onHover={setHoveredId}
+                isMobile={isMobile}
               />
             ))}
           </div>
