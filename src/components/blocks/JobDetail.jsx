@@ -168,6 +168,25 @@ export default function JobDetail({ job, blok }) {
           padding: isMobile ? '24px 20px 64px' : '36px 52px 80px',
         }}>
 
+          {/* Apply card — mobile only, shown above JD */}
+          {isMobile && (
+            <div style={{ background: 'var(--ink)', borderRadius: 18, padding: '22px 20px', position: 'relative', overflow: 'hidden', marginBottom: 28 }}>
+              <div style={{ position: 'absolute', bottom: -30, right: -30, width: 110, height: 110, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,122,92,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: '#7FD4C1', marginBottom: 3, textTransform: 'uppercase' }}>Ready?</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, color: 'var(--paper)', letterSpacing: '-0.02em', marginBottom: 6 }}>Apply in<br />3 minutes.</div>
+              <p style={{ margin: '0 0 16px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>No cover letter. Upload a résumé or paste LinkedIn. We respond within 24 hours.</p>
+              <a href={`/jobs/${job.id}/apply`} style={{ width: '100%', padding: '12px', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, color: '#fff', background: '#FF7A5C', border: 'none', borderRadius: 10, cursor: 'pointer', marginBottom: 8, display: 'block', textAlign: 'center', textDecoration: 'none' }}>Apply now →</a>
+              <div style={{ display: 'flex', gap: 7 }}>
+                <button type="button" onClick={() => toggleSave(job.id)} style={{ flex: 1, padding: '8px', fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 500, color: saved ? '#FF7A5C' : 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.07)', border: `1px solid ${saved ? 'rgba(255,122,92,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                  <BookmarkIcon filled={saved} /> {saved ? 'Saved' : 'Save'}
+                </button>
+                <button type="button" style={{ flex: 1, padding: '8px', fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                  <ShareIcon /> Share
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Breadcrumb */}
           <div style={{ marginBottom: 28 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1.5, color: 'var(--ink3)', textTransform: 'uppercase' }}>
@@ -221,7 +240,7 @@ export default function JobDetail({ job, blok }) {
           </div>
 
           {/* Combined: Comp Calculator + Applicants + Impact */}
-          {showCompCalc && (
+          {showCompCalc && !isMobile && (
             <RevealSection scrollRoot={leftColRef}>
               <div style={{ background: 'var(--ink)', borderRadius: 16, padding: isMobile ? '18px' : '20px 28px', marginBottom: 36, position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(244,185,66,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -514,8 +533,8 @@ export default function JobDetail({ job, blok }) {
           background: 'var(--paper)',
         }}>
 
-          {/* Apply Card */}
-          <div style={{ background: 'var(--ink)', borderRadius: 18, padding: '22px 20px', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+          {/* Apply Card — desktop only (mobile version is above JD in left column) */}
+          {!isMobile && <div style={{ background: 'var(--ink)', borderRadius: 18, padding: '22px 20px', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
             <div style={{ position: 'absolute', bottom: -30, right: -30, width: 110, height: 110, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,122,92,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: '#7FD4C1', marginBottom: 3, textTransform: 'uppercase' }}>Ready?</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, color: 'var(--paper)', letterSpacing: '-0.02em', marginBottom: 6 }}>Apply in<br />3 minutes.</div>
@@ -535,7 +554,7 @@ export default function JobDetail({ job, blok }) {
               </button>
             </div>
             <div style={{ marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'rgba(255,255,255,0.2)', textAlign: 'center', textTransform: 'uppercase' }}>~3 min · No cover letter · Response in 24h</div>
-          </div>
+          </div>}
 
           {/* Location Card */}
           <div style={{ borderRadius: 14, border: '1px solid var(--line2)', overflow: 'hidden', background: 'var(--paper)', flexShrink: 0 }}>
