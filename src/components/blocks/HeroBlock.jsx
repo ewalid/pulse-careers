@@ -4,6 +4,8 @@ import { storyblokEditable } from '@storyblok/react/rsc';
 import NeonBlob from '@/components/ui/NeonBlob';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { TOTAL_JOBS, JOBS_BY_CATEGORY } from '@/lib/ats-mock';
+import { usePersonalization } from '@/lib/usePersonalization';
+import { incrementVisitCount } from '@/lib/userProfile';
 
 const MOCK_QUERY = "5 years as a software engineer, looking to transition into product management or anywhere my engineering background becomes the advantage";
 
@@ -23,6 +25,22 @@ const SUGGESTIONS = [
   { text: 'Teams hiring in Lisbon this quarter', color: '#7FD4C1', key: 'lisbon' },
   { text: 'Where will I grow fastest as IC?', color: '#F4B942', key: 'ic-growth' },
 ];
+
+const SEGMENT_COPY = {
+  'Engineering':   { headline: 'Still shipping? We thought so.', subheadline: 'The hard problems are still unsolved.' },
+  'AI & Research': { headline: 'The models got better. So did the roles.', subheadline: 'Research that ships.' },
+  'Design':        { headline: 'Great taste gets you in.', subheadline: 'Craft keeps you.' },
+  'Data Science':  { headline: 'Your next dataset is waiting.', subheadline: 'Make the numbers mean something.' },
+  'Operations':    { headline: 'The machine runs on people like you.', subheadline: 'Scale what matters.' },
+};
+
+const SEGMENT_CHIP_KEY = {
+  'Engineering':   'ic-growth',
+  'AI & Research': 'ic-growth',
+  'Design':        'biotech-pm',
+  'Data Science':  'biotech-pm',
+  'Operations':    'lisbon',
+};
 
 function WordReveal({ text, baseDelay = 0, style = {}, accentWord = '' }) {
   const words = text.split(' ');
@@ -91,6 +109,7 @@ function useTypingPlaceholder(suggestions, active) {
 
 export default function HeroBlock({ blok }) {
   const isMobile = useIsMobile();
+  const { isReturning, segment } = usePersonalization();
   const [query, setQuery] = useState('');
   const [queryChip, setQueryChip] = useState(false);
   const [suggestionKey, setSuggestionKey] = useState('eng-to-pm');
@@ -99,6 +118,8 @@ export default function HeroBlock({ blok }) {
   const [linkedinConnected, setLinkedinConnected] = useState(false);
   const typewriterRef = useRef(null);
   const openRoles = TOTAL_JOBS;
+
+  useEffect(() => { incrementVisitCount(); }, []);
 
   function startTypewriter() {
     clearInterval(typewriterRef.current);
@@ -129,7 +150,16 @@ export default function HeroBlock({ blok }) {
   const subheadlineSize = isMobile ? '36px' : (SUBHEADLINE_SIZES[blok?.subheadline_size] || '72px');
   const hudLocation = blok?.hud_location || 'PULSE / 2026  ·  LIVE FROM LISBON HQ  ·  38.72°N  ·  9.14°W';
 
-  const typedPlaceholder = useTypingPlaceholder(SUGGESTIONS, !query && !focused);
+  const personaCopy = isReturning && segment ? SEGMENT_COPY[segment] : null;
+  const activeHeadline = personaCopy?.headline || blok?.headline || 'Find Where You Belong.';
+  const activeSubheadline = personaCopy?.subheadline || blok?.subheadline || "Build What's Next.";
+
+  const preferredChipKey = isReturning && segment ? SEGMENT_CHIP_KEY[segment] : null;
+  const orderedSuggestions = preferredChipKey
+    ? [...SUGGESTIONS].sort((a, b) => (a.key === preferredChipKey ? -1 : b.key === preferredChipKey ? 1 : 0))
+    : SUGGESTIONS;
+
+  const typedPlaceholder = useTypingPlaceholder(orderedSuggestions, !query && !focused);
   const displayPlaceholder = query || focused
     ? 'Search roles, teams, skills…'
     : (typedPlaceholder || 'Search roles, teams, skills…');
@@ -175,7 +205,7 @@ export default function HeroBlock({ blok }) {
           {/* Headline — word-by-word reveal */}
           <h1 style={{ margin: '0 0 28px', fontFamily: 'var(--font-display)', fontWeight: 600, lineHeight: 1.05, letterSpacing: '-0.03em', textShadow: '0 2px 40px rgba(26,20,24,0.4)' }}>
             <span style={{ display: 'block', fontSize: headlineSize, marginBottom: '0.08em', overflow: 'hidden' }}>
-              <WordReveal text={blok?.headline || 'Find Where You Belong.'} baseDelay={200} accentWord={blok?.headline_accent_word} />
+              <WordReveal text={activeHeadline} baseDelay={200} accentWord={blok?.headline_accent_word} />
             </span>
             {/* Subheadline animates as one unit to preserve gradient */}
             <span style={{
@@ -186,7 +216,7 @@ export default function HeroBlock({ blok }) {
               opacity: 0,
               animation: 'fade-up 0.7s cubic-bezier(0.16,1,0.3,1) 600ms forwards',
             }}>
-              {blok?.subheadline || "Build What's Next."}
+              {activeSubheadline}
             </span>
           </h1>
 
@@ -242,7 +272,7 @@ export default function HeroBlock({ blok }) {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'nowrap' }}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'rgba(244,237,225,0.4)', textTransform: 'uppercase', flexShrink: 0 }}>TRY:</span>
-                  {(isMobile ? SUGGESTIONS.slice(0, 2) : SUGGESTIONS).map(s => (
+                  {(isMobile ? orderedSuggestions.slice(0, 2) : orderedSuggestions).map(s => (
                     <button key={s.text} onClick={() => { clearInterval(typewriterRef.current); setQuery(s.text); setQueryChip(true); setSuggestionKey(s.key); }} style={{
                       fontFamily: 'var(--font-mono)', fontSize: 10, color: s.color,
                       background: `${s.color}18`, border: `1px solid ${s.color}44`,
