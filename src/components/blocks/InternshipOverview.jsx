@@ -26,7 +26,7 @@ export default function InternshipOverview({ blok }) {
   const description   = blok?.description    || "You'll be assigned a real problem — something we'd pay a full-time engineer to solve. Your mentor blocks out 3 hours a week for you, and every intern presents their work to the whole company in week 11.";
   const timelineLabel = blok?.timeline_label || 'SUMMER 2026 · TIMELINE';
   const ctaLabel      = blok?.cta_label      || 'Apply for Summer 2026 →';
-  const ctaUrl        = resolveLink(blok?.cta_url) || '#';
+  const ctaUrl        = resolveLink(blok?.cta_url) || '/jobs?e=Internship';
   const highlights    = blok?.highlights?.length    ? blok.highlights    : DEFAULT_HIGHLIGHTS;
   const timelineItems = blok?.timeline_items?.length ? blok.timeline_items : DEFAULT_TIMELINE;
 

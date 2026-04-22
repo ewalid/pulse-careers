@@ -363,8 +363,10 @@ export default function JobList({ blok }) {
     const params = new URLSearchParams(window.location.search);
     const q = params.get('q');
     const d = params.get('d');
+    const e = params.get('e');
     if (q) setSearch(q);
     if (d) setDisciplines(d.split(',').filter(Boolean));
+    if (e) setEmployment(e.split(',').filter(Boolean));
   }, []);
 
   function startTypewriter() {
