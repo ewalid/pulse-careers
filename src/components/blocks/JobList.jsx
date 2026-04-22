@@ -5,6 +5,46 @@ import { useIsMobile } from '@/lib/useIsMobile';
 import { JOBS, timeAgo } from '@/lib/ats-mock';
 import { accentHeadline } from '@/lib/accentHeadline';
 import { useSavedJobs } from '@/lib/SavedJobsContext';
+import SearchAIBanner from '@/components/SearchAIBanner';
+
+const SUGGESTION_RULES = [
+  {
+    key: 'biotech-pm',
+    tone: 'coral',
+    test: (q) => /\b(pm|product\s*manager|biotech|clinical|pharma|program\s*manager|tpm)\b/i.test(q),
+    filter: (jobs) => jobs.filter(j => /product|program/i.test(j.title)),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'coral',
+      headline: 'Your PM experience is valuable — and transferable here.',
+      body: 'Biotech PMs bring something rare to AI research: comfort with evidence gates, regulatory rigour, and stakeholder environments where scientists are the decision-makers. Those instincts translate directly to research platform and program management roles at Pulse. The three roles below are the ones where your background gives you the highest signal-to-noise ratio.',
+    },
+  },
+  {
+    key: 'lisbon',
+    tone: 'mint',
+    test: (q) => /\b(lisbon|quarter|this\s*quarter|hiring\s*in)\b/i.test(q),
+    filter: (jobs) => jobs.filter(j => j.location === 'Lisbon, PT'),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'mint',
+      headline: 'Lisbon is our fastest-growing hub right now.',
+      body: 'Three teams have open headcount in Lisbon this quarter, all with relocation packages and most with visa sponsorship. The Lisbon office runs on a hybrid model — 3 days in-office, coordinated by team — and sits 10 minutes from the city centre. Most of the founding engineering team is still here.',
+    },
+  },
+  {
+    key: 'ic-growth',
+    tone: 'amber',
+    test: (q) => /\b(ic|grow|fastest|individual\s*contributor|senior\s*to\s*staff|staff\s*to\s*principal|level\s*up)\b/i.test(q),
+    filter: (jobs) => jobs.filter(j => ['Senior', 'Staff', 'Principal'].includes(j.seniority)),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'amber',
+      headline: 'IC growth at Pulse is about leverage, not tenure.',
+      body: 'The fastest path from Senior to Staff here runs through ownership surface — how much of a system you control and how directly your work influences model quality or user experience. Based on current team structures and open headcount, these tracks offer the clearest IC runway without being pushed into management.',
+    },
+  },
+];
 
 const TONE_COLORS = {
   coral: '#FF7A5C',
@@ -503,12 +543,35 @@ export default function JobList({ blok }) {
 
   const salaryFloor = SALARY_STEPS[salaryStep];
 
+  // Detect if the current search matches a known AI suggestion pattern
+  const matchedRule = useMemo(() => {
+    if (!search) return null;
+    return SUGGESTION_RULES.find(r => r.test(search)) || null;
+  }, [search]);
+
+  // Resolve the AI suggestion: prefer CMS-authored version, fall back to default
+  const matchedSuggestion = useMemo(() => {
+    if (!matchedRule) return null;
+    const cmsSuggestions = blok?.ai_suggestions || [];
+    const cms = cmsSuggestions.find(s => {
+      const key = s.suggestion_key || s.content?.suggestion_key || '';
+      return key === matchedRule.key;
+    });
+    if (cms) return { ...matchedRule.defaultSuggestion, ...cms, ...cms.content };
+    return matchedRule.defaultSuggestion;
+  }, [matchedRule, blok]);
+
   const filtered = useMemo(() => {
     let jobs = JOBS;
-    if (search) {
+
+    if (matchedRule && search) {
+      // AI suggestion mode: use smart filter, ignore normal text search
+      jobs = matchedRule.filter(jobs);
+    } else if (search) {
       const q = search.toLowerCase();
       jobs = jobs.filter(j => j.title.toLowerCase().includes(q) || j.job_category.toLowerCase().includes(q));
     }
+
     if (disciplines.length) jobs = jobs.filter(j => disciplines.includes(j.job_category));
     if (locations.length) jobs = jobs.filter(j => locations.includes(j.location));
     if (seniorities.length) jobs = jobs.filter(j => seniorities.includes(j.seniority));
@@ -518,7 +581,7 @@ export default function JobList({ blok }) {
     if (sortBy === 'newest') return [...jobs].sort((a, b) => new Date(b.publication_date) - new Date(a.publication_date));
     if (sortBy === 'match') return [...jobs].sort((a, b) => (b.match || 0) - (a.match || 0));
     return jobs;
-  }, [search, disciplines, locations, seniorities, employment, salaryFloor, sortBy]);
+  }, [search, matchedRule, disciplines, locations, seniorities, employment, salaryFloor, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
   const currentPage = Math.min(page, totalPages);
@@ -697,6 +760,11 @@ export default function JobList({ blok }) {
                 </div>
               )}
             </div>
+          )}
+
+          {/* AI suggestion banner */}
+          {matchedSuggestion && (
+            <SearchAIBanner query={search} suggestion={matchedSuggestion} />
           )}
 
           {/* Results header */}
