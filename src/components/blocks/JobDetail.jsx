@@ -408,9 +408,9 @@ export default function JobDetail({ job, blok }) {
                         width: processStep === i ? 46 : 38,
                         height: processStep === i ? 46 : 38,
                         borderRadius: '50%',
-                        border: `2px solid ${processStep === i ? step.color : 'var(--line)'}`,
-                        background: processStep === i ? step.color : 'var(--paper2)',
-                        color: processStep === i ? '#fff' : 'var(--ink2)',
+                        border: `2px solid ${i < processStep ? step.color : processStep === i ? step.color : 'var(--line)'}`,
+                        background: i < processStep ? step.color : processStep === i ? step.color : 'var(--paper2)',
+                        color: i <= processStep ? '#fff' : 'var(--ink2)',
                         cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'all 0.18s',
@@ -420,7 +420,13 @@ export default function JobDetail({ job, blok }) {
                       }}
                       title={`${step.label} · ${step.duration}`}
                     >
-                      {i + 1}
+                      {i < processStep ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      ) : (
+                        String(i + 1).padStart(2, '0')
+                      )}
                     </button>
                     {i < PROCESS_STEPS.length - 1 && (
                       <div style={{ flex: 1, height: 2, background: i < processStep ? tone.accent : 'var(--line)', minWidth: isMobile ? 12 : 0, transition: 'background 0.2s' }} />

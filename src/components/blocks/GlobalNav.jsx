@@ -37,7 +37,7 @@ export default function GlobalNav({ blok }) {
         padding: isMobile ? '14px 20px' : '16px 48px',
       }}>
         {/* Logo */}
-        <PulseLogo size={18} />
+        <PulseLogo size={26} />
 
         {isMobile ? (
           /* Mobile: hamburger */

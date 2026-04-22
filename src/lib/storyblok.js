@@ -14,6 +14,11 @@ import WhoWeAre from '@/components/blocks/WhoWeAre';
 import JobsSearch from '@/components/blocks/JobsSearch';
 import JobList from '@/components/blocks/JobList';
 import JobDetail from '@/components/blocks/JobDetail';
+import EditorialHero from '@/components/blocks/EditorialHero';
+import HeroVideo from '@/components/blocks/HeroVideo';
+import ValuesBlock from '@/components/blocks/ValuesBlock';
+import EditorialLifestyle from '@/components/blocks/EditorialLifestyle';
+import BrandCta from '@/components/blocks/BrandCta';
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
 export const getStoryblokApi = storyblokInit({
@@ -39,6 +44,13 @@ export const getStoryblokApi = storyblokInit({
 		job_faq_item: () => null,
 		team_member: () => null,
 		global_config: () => null,
+		editorial_hero: EditorialHero,
+		hero_video: HeroVideo,
+		values_block: ValuesBlock,
+		editorial_lifestyle: EditorialLifestyle,
+		brand_cta: BrandCta,
+		value_item: () => null,
+		benefit_item: () => null,
 	},
 	apiOptions: {
 		region: process.env.STORYBLOK_REGION || 'eu',
