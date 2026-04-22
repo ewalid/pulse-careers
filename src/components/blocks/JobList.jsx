@@ -4,6 +4,7 @@ import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { JOBS, timeAgo } from '@/lib/ats-mock';
 import { accentHeadline } from '@/lib/accentHeadline';
+import { useSavedJobs } from '@/lib/SavedJobsContext';
 
 const TONE_COLORS = {
   coral: '#FF7A5C',
@@ -486,7 +487,7 @@ export default function JobList({ blok }) {
   const [salaryStep, setSalaryStep] = useState(0);
   const [sortBy, setSortBy] = useState('newest');
   const [page, setPage] = useState(1);
-  const [bookmarks, setBookmarks] = useState(new Set());
+  const { isSaved, toggleSave } = useSavedJobs();
   const [hoveredId, setHoveredId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -532,10 +533,6 @@ export default function JobList({ blok }) {
     ...(salaryStep > 0 ? [{ label: SALARY_LABELS[salaryStep], category: 'SALARY', color: '#9B7FD4', onRemove: () => { setSalaryStep(0); setPage(1); } }] : []),
     ...(search ? [{ label: search, category: 'SEARCH', color: 'var(--ink3)', onRemove: () => { setSearch(''); setPage(1); } }] : []),
   ];
-
-  function toggleBookmark(id) {
-    setBookmarks(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  }
 
   function handleSearch(q) {
     setSearch(q);
@@ -797,8 +794,8 @@ export default function JobList({ blok }) {
               <JobCard
                 key={job.id}
                 job={job}
-                bookmarked={bookmarks.has(job.id)}
-                onBookmark={toggleBookmark}
+                bookmarked={isSaved(job.id)}
+                onBookmark={toggleSave}
                 showSalary={showSalary}
                 showDepartment={showDepartment}
                 showLocation={showLocation}

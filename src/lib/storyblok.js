@@ -19,6 +19,14 @@ import HeroVideo from '@/components/blocks/HeroVideo';
 import ValuesBlock from '@/components/blocks/ValuesBlock';
 import EditorialLifestyle from '@/components/blocks/EditorialLifestyle';
 import BrandCta from '@/components/blocks/BrandCta';
+import PageHero from '@/components/blocks/PageHero';
+import TeamsGrid from '@/components/blocks/TeamsGrid';
+import TeamDetail from '@/components/blocks/TeamDetail';
+import BenefitsGrid from '@/components/blocks/BenefitsGrid';
+import InternshipOverview from '@/components/blocks/InternshipOverview';
+import StoryTimeline from '@/components/blocks/StoryTimeline';
+import TestimonialsSelector from '@/components/blocks/TestimonialsSelector';
+import TestimonyDetail from '@/components/blocks/TestimonyDetail';
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
 export const getStoryblokApi = storyblokInit({
@@ -52,6 +60,30 @@ export const getStoryblokApi = storyblokInit({
 		value_item: () => null,
 		benefit_item: () => null,
 		editorial_image: () => null,
+		page_hero: PageHero,
+		teams_grid: TeamsGrid,
+		team_detail: TeamDetail,
+		benefits_grid: BenefitsGrid,
+		internship_overview: InternshipOverview,
+		story_timeline: StoryTimeline,
+		testimonials_selector: TestimonialsSelector,
+		testimony_detail: TestimonyDetail,
+		team_card_item: () => null,
+		work_stream_item: () => null,
+		ritual_item: () => null,
+		ship_item: () => null,
+		voice_item_2: () => null,
+		team_job_item: () => null,
+		benefit_category: () => null,
+		benefit_card_item: () => null,
+		intern_highlight: () => null,
+		timeline_item: () => null,
+		story_chapter: () => null,
+		founder_item: () => null,
+		selector_testimony_item: () => null,
+		testimony_chapter: () => null,
+		testimony_chapter_item: () => null,
+		open_role_item: () => null,
 	},
 	apiOptions: {
 		region: process.env.STORYBLOK_REGION || 'eu',
