@@ -1,6 +1,6 @@
 'use client';
 import { storyblokEditable } from '@storyblok/react/rsc';
-import { JOBS, timeAgo } from '@/lib/ats-mock';
+import { JOBS, TOTAL_JOBS, timeAgo } from '@/lib/ats-mock';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
 import { resolveLink } from '@/lib/resolveLink';
@@ -147,8 +147,8 @@ export default function JobSuggestions({ blok }) {
 
   const headline = blok?.headline || 'Three roles worth a look.';
   const headlineAccent = blok?.headline_accent_word || 'worth a look';
-  const subtitle = blok?.subtitle || 'Curated weekly by the talent team · 247 open roles in total';
-  const ctaLabel = blok?.cta_label || 'All 247 roles';
+  const subtitle = blok?.subtitle || `Curated weekly by the talent team · ${TOTAL_JOBS} open roles in total`;
+  const ctaLabel = blok?.cta_label || `All ${TOTAL_JOBS} roles`;
   const ctaUrl = resolveLink(blok?.cta_url) || '/jobs';
 
   const jobsById = Object.fromEntries(JOBS.map(j => [j.id, j]));

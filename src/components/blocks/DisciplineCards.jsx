@@ -4,6 +4,7 @@ import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
 import { resolveLink } from '@/lib/resolveLink';
+import { TOTAL_JOBS, JOBS_BY_CATEGORY } from '@/lib/ats-mock';
 
 const ACCENT_COLORS = {
   coral: '#FF7A5C',
@@ -22,11 +23,11 @@ const PLACEHOLDER_TONES = {
 };
 
 const DEFAULT_DISCIPLINES = [
-  { title: 'Engineering', count: 94, note: 'Infra · ML · Platform · iOS', accent_color: 'coral' },
-  { title: 'Data Science', count: 38, note: 'Analytics · Research · Causal', accent_color: 'amber' },
-  { title: 'AI & Research', count: 47, note: 'Models · Safety · Applied', accent_color: 'violet' },
-  { title: 'Operations', count: 41, note: 'Supply · People · Finance · Legal', accent_color: 'mint' },
-  { title: 'Design', count: 27, note: 'Product · Brand · Motion · Research', accent_color: 'coral-soft' },
+  { title: 'Engineering',   count: JOBS_BY_CATEGORY['Engineering']   || 0, note: 'Infra · ML · Platform · iOS',          accent_color: 'coral' },
+  { title: 'Data Science',  count: JOBS_BY_CATEGORY['Data Science']  || 0, note: 'Analytics · Research · Causal',        accent_color: 'amber' },
+  { title: 'AI & Research', count: JOBS_BY_CATEGORY['AI & Research'] || 0, note: 'Models · Safety · Applied',            accent_color: 'violet' },
+  { title: 'Operations',    count: JOBS_BY_CATEGORY['Operations']    || 0, note: 'Supply · People · Finance · Legal',    accent_color: 'mint' },
+  { title: 'Design',        count: JOBS_BY_CATEGORY['Design']        || 0, note: 'Product · Brand · Motion · Research',  accent_color: 'coral-soft' },
 ];
 
 function DisciplineCard({ item }) {
@@ -34,7 +35,7 @@ function DisciplineCard({ item }) {
   const accentKey = item.accent_color || 'coral';
   const accent = ACCENT_COLORS[accentKey] || '#FF7A5C';
   const tone = PLACEHOLDER_TONES[accentKey] || PLACEHOLDER_TONES.coral;
-  const count = item.count ?? '';
+  const count = JOBS_BY_CATEGORY[item.title] ?? item.count ?? '';
 
   const handleMouseMove = (e) => {
     const card = cardRef.current;
@@ -145,7 +146,7 @@ function DisciplineCard({ item }) {
 export default function DisciplineCards({ blok }) {
   const isMobile = useIsMobile();
   const items = (blok?.disciplines?.length > 0) ? blok.disciplines : DEFAULT_DISCIPLINES;
-  const ctaLabel = blok?.cta_label || 'All 247 roles';
+  const ctaLabel = blok?.cta_label || `All ${TOTAL_JOBS} roles`;
   const ctaUrl = resolveLink(blok?.cta_url) || '#';
 
   return (

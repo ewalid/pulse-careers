@@ -2,15 +2,27 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
-import { JOBS, timeAgo } from '@/lib/ats-mock';
+import { JOBS, TOTAL_JOBS, timeAgo } from '@/lib/ats-mock';
 import { accentHeadline } from '@/lib/accentHeadline';
 import { useSavedJobs } from '@/lib/SavedJobsContext';
 import SearchAIBanner from '@/components/SearchAIBanner';
 import JobCard, { TONE_COLORS } from '@/components/JobCard';
 
-export const MOCK_QUERY = "5 years in software engineering, Master's in CS — looking to move into a customer-facing or Developer Relations role";
+export const MOCK_QUERY = "5 years as a software engineer, looking to transition into product management or anywhere my engineering background becomes the advantage";
 
 const SUGGESTION_RULES = [
+  {
+    key: 'eng-to-pm',
+    tone: 'violet',
+    test: (q) => q.length > 20 && /transition|product.manag|project.manag|program.manag|TPM|moving.into|switch|pivot|leadership.role|manag.*role/i.test(q) && /engineer|eng|software|technical|coding|developer/i.test(q),
+    filter: (jobs) => jobs.filter(j => /product manager|program manager|TPM|technical program|solutions engineer/i.test(j.title)).slice(0, 4),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'violet',
+      headline: 'Engineering to PM is a high-signal move — and the data backs it.',
+      body: "At Pulse, 18% of PM hires in the last two years came from engineering backgrounds. That's not a coincidence — research platform PMs who can read a pull request and a user interview in the same morning are rare. Your five years of engineering gives you two things most PM candidates don't have: a working model of how hard things are to build, and credibility with the engineers you'll depend on. The roles below are the ones where that combination is a genuine competitive advantage, not just a checkbox.",
+    },
+  },
   {
     key: 'customer-facing',
     tone: 'violet',
@@ -347,41 +359,25 @@ export default function JobList({ blok }) {
   const allowBookmark = blok?.allow_bookmark !== false;
   const itemsPerPage = Number(blok?.items_per_page) || 8;
 
-  const headline = blok?.headline || '247 open roles.';
+  const headline = blok?.headline || `${TOTAL_JOBS} open roles.`;
   const subline = blok?.subline || 'Find yours in under a minute.';
   const accentWord = blok?.headline_accent_word || '';
   const eyebrow = blok?.eyebrow || 'CAREERS  ›  OPEN ROLES';
-  const rawTags = blok?.popular_tags || 'ML Engineer\nStaff+\nRemote EMEA\nReturnship\nNew grad';
+  const rawTags = blok?.popular_tags || 'ML Engineer\nStaff+\nRemote EMEA\nInternship\nNew grad';
   const popularTags = rawTags.split('\n').map(t => t.trim()).filter(Boolean);
 
   const [search, setSearch] = useState('');
-  const searchFocusedRef = useRef(false);
-  const autoFillDoneRef = useRef(false);
-  const typewriterRef = useRef(null);
+  const [heroSuggestionKey, setHeroSuggestionKey] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
+    const ai = params.get('ai');
     const d = params.get('d');
     const e = params.get('e');
-    if (q) setSearch(q);
+    if (ai) setHeroSuggestionKey(ai);
     if (d) setDisciplines(d.split(',').filter(Boolean));
     if (e) setEmployment(e.split(',').filter(Boolean));
   }, []);
-
-  function startTypewriter() {
-    if (autoFillDoneRef.current) return;
-    autoFillDoneRef.current = true;
-    handleSearch('');
-    let i = 0;
-    typewriterRef.current = setInterval(() => {
-      i++;
-      handleSearch(MOCK_QUERY.slice(0, i));
-      if (i >= MOCK_QUERY.length) clearInterval(typewriterRef.current);
-    }, 28);
-  }
-
-  useEffect(() => () => clearInterval(typewriterRef.current), []);
 
   const [disciplines, setDisciplines] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -408,9 +404,10 @@ export default function JobList({ blok }) {
 
   // Detect if the current search matches a known AI suggestion pattern
   const matchedRule = useMemo(() => {
+    if (heroSuggestionKey) return SUGGESTION_RULES.find(r => r.key === heroSuggestionKey) || null;
     if (!search) return null;
     return SUGGESTION_RULES.find(r => r.test(search)) || null;
-  }, [search]);
+  }, [search, heroSuggestionKey]);
 
   // Resolve the AI suggestion: prefer CMS-authored version, fall back to default
   const matchedSuggestion = useMemo(() => {
@@ -427,7 +424,7 @@ export default function JobList({ blok }) {
   const filtered = useMemo(() => {
     let jobs = JOBS;
 
-    if (matchedRule && search) {
+    if (matchedRule && (search || heroSuggestionKey)) {
       // AI suggestion mode: use smart filter, ignore normal text search
       jobs = matchedRule.filter(jobs);
     } else if (search) {
@@ -444,7 +441,7 @@ export default function JobList({ blok }) {
     if (sortBy === 'newest') return [...jobs].sort((a, b) => new Date(b.publication_date) - new Date(a.publication_date));
     if (sortBy === 'match') return [...jobs].sort((a, b) => (b.match || 0) - (a.match || 0));
     return jobs;
-  }, [search, matchedRule, disciplines, locations, seniorities, employment, salaryFloor, sortBy]);
+  }, [search, matchedRule, heroSuggestionKey, disciplines, locations, seniorities, employment, salaryFloor, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
   const currentPage = Math.min(page, totalPages);
@@ -457,11 +454,11 @@ export default function JobList({ blok }) {
     ...seniorities.map(v => ({ label: v, category: 'SENIORITY', color: '#9B7FD4', onRemove: () => { setSeniorities(p => p.filter(x => x !== v)); setPage(1); } })),
     ...employment.map(v => ({ label: v, category: 'WORK TYPE', color: '#7FD4C1', onRemove: () => { setEmployment(p => p.filter(x => x !== v)); setPage(1); } })),
     ...(salaryStep > 0 ? [{ label: SALARY_LABELS[salaryStep], category: 'SALARY', color: '#9B7FD4', onRemove: () => { setSalaryStep(0); setPage(1); } }] : []),
-    ...(search ? [{ label: search, category: 'SEARCH', color: 'var(--ink3)', onRemove: () => { setSearch(''); setPage(1); } }] : []),
   ];
 
   function handleSearch(q) {
     setSearch(q);
+    setHeroSuggestionKey(null);
     setPage(1);
   }
 
@@ -529,18 +526,7 @@ export default function JobList({ blok }) {
                   type="text"
                   value={search}
                   placeholder="Search roles, teams, skills…"
-                  onFocus={() => { searchFocusedRef.current = true; }}
-                  onBlur={() => { searchFocusedRef.current = false; }}
-                  onClick={() => {
-                    if (searchFocusedRef.current && !autoFillDoneRef.current) startTypewriter();
-                  }}
-                  onChange={e => {
-                    if (!autoFillDoneRef.current) {
-                      startTypewriter();
-                    } else {
-                      handleSearch(e.target.value);
-                    }
-                  }}
+                  onChange={e => handleSearch(e.target.value)}
                   style={{
                     flex: 1, border: 'none', outline: 'none', background: 'transparent',
                     fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink)', padding: '12px 0',

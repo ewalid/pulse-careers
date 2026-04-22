@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 certificates
+
+# local tooling + design files
+.claude/
+assets/
+claude-code-design/

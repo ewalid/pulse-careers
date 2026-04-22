@@ -2,6 +2,7 @@
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { resolveLink } from '@/lib/resolveLink';
+import { JOBS_BY_CATEGORY } from '@/lib/ats-mock';
 
 const TONES = {
   coral:  { bg: '#FFD6C8', accent: '#FF7A5C' },
@@ -11,11 +12,11 @@ const TONES = {
 };
 
 const DEFAULT_TEAMS = [
-  { slug: 'engineering',  name: 'Engineering',   open_count: 94, tone: 'coral',  tagline: 'We build tools that other engineers rely on.',     disciplines: 'Infra · Platform · ML · iOS · Web · Security',      headcount: 420, summary: 'The load-bearing wall. Platforms, pipelines, primitives — the infra every other team runs on.' },
-  { slug: 'ai-research',  name: 'AI & Research', open_count: 47, tone: 'violet', tagline: 'Long-horizon research, applied responsibly.',       disciplines: 'Foundational Models · Applied AI · Safety · Evals', headcount: 180, summary: 'Picks problems that take years, and sees them through. Safety and capabilities at 1:1 headcount.' },
-  { slug: 'design',       name: 'Design',        open_count: 27, tone: 'coral',  tagline: 'Design reviews start with how users feel.',         disciplines: 'Product · Brand · Motion · Research · Content',     headcount: 88,  summary: 'Ships systems, not screens. Motion specs, not JPEGs. Craft as product strategy.' },
-  { slug: 'data-science', name: 'Data Science',  open_count: 38, tone: 'amber',  tagline: 'Analytics that change decisions, not dashboards.',  disciplines: 'Analytics · Experimentation · Causal · BI',          headcount: 120, summary: "Every analysis changes a decision. If it doesn't, we don't build it." },
-  { slug: 'operations',   name: 'Operations',    open_count: 41, tone: 'mint',   tagline: 'The quiet scaffolding. We hold the company.',       disciplines: 'People · Finance · Legal · Supply · Procurement',   headcount: 210, summary: 'People, Finance, Legal, Supply, IT, Procurement. Not a back office — the forward-planning function.' },
+  { slug: 'engineering',  name: 'Engineering',   open_count: JOBS_BY_CATEGORY['Engineering']   || 0, tone: 'coral',  tagline: 'We build tools that other engineers rely on.',     disciplines: 'Infra · Platform · ML · iOS · Web · Security',      headcount: 420, summary: 'The load-bearing wall. Platforms, pipelines, primitives — the infra every other team runs on.' },
+  { slug: 'ai-research',  name: 'AI & Research', open_count: JOBS_BY_CATEGORY['AI & Research'] || 0, tone: 'violet', tagline: 'Long-horizon research, applied responsibly.',       disciplines: 'Foundational Models · Applied AI · Safety · Evals', headcount: 180, summary: 'Picks problems that take years, and sees them through. Safety and capabilities at 1:1 headcount.' },
+  { slug: 'design',       name: 'Design',        open_count: JOBS_BY_CATEGORY['Design']        || 0, tone: 'coral',  tagline: 'Design reviews start with how users feel.',         disciplines: 'Product · Brand · Motion · Research · Content',     headcount: 88,  summary: 'Ships systems, not screens. Motion specs, not JPEGs. Craft as product strategy.' },
+  { slug: 'data-science', name: 'Data Science',  open_count: JOBS_BY_CATEGORY['Data Science']  || 0, tone: 'amber',  tagline: 'Analytics that change decisions, not dashboards.',  disciplines: 'Analytics · Experimentation · Causal · BI',          headcount: 120, summary: "Every analysis changes a decision. If it doesn't, we don't build it." },
+  { slug: 'operations',   name: 'Operations',    open_count: JOBS_BY_CATEGORY['Operations']    || 0, tone: 'mint',   tagline: 'The quiet scaffolding. We hold the company.',       disciplines: 'People · Finance · Legal · Supply · Procurement',   headcount: 210, summary: 'People, Finance, Legal, Supply, IT, Procurement. Not a back office — the forward-planning function.' },
 ];
 
 function TeamCard({ team, index, total, isMobile }) {

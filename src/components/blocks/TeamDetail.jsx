@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { resolveLink } from '@/lib/resolveLink';
-import { JOBS } from '@/lib/ats-mock';
+import { JOBS, JOBS_BY_CATEGORY } from '@/lib/ats-mock';
 import { useSavedJobs } from '@/lib/SavedJobsContext';
 import JobCard from '@/components/JobCard';
 
@@ -19,7 +19,7 @@ const DEFAULT_DATA = {
   tagline: 'We build tools that other engineers rely on.',
   tone: 'coral',
   stat_1_k: 'Engineers',     stat_1_v: '420',
-  stat_2_k: 'Open roles',    stat_2_v: '94',
+  stat_2_k: 'Open roles',    stat_2_v: String(JOBS_BY_CATEGORY['Engineering'] || 0),
   stat_3_k: 'Locations',     stat_3_v: '7',
   stat_4_k: 'Services shipped', stat_4_v: '1,240',
   mission_1: 'Pulse Engineering is the load-bearing wall of the company. We build the platforms, pipelines, and primitives that every other team depends on to move fast without breaking the people using our product.',
