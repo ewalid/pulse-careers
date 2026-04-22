@@ -361,7 +361,7 @@ function SidebarContent({ disciplines, setDisciplines, locations, setLocations, 
   );
 }
 
-function JobCard({ job, bookmarked, onBookmark, showSalary, showDepartment, showLocation, allowBookmark, hovered, onHover }) {
+function JobCard({ job, bookmarked, onBookmark, showSalary, showDepartment, showLocation, allowBookmark, hovered, onHover, isMobile }) {
   const toneColor = TONE_COLORS[job.tone] || TONE_COLORS.coral;
 
   return (
@@ -369,12 +369,13 @@ function JobCard({ job, bookmarked, onBookmark, showSalary, showDepartment, show
       onMouseEnter={() => onHover(job.id)}
       onMouseLeave={() => onHover(null)}
       style={{
-        background: hovered ? 'var(--paper)' : 'var(--paper)',
+        background: 'var(--paper)',
         borderWidth: 1, borderStyle: 'solid', borderColor: 'var(--line2)',
-        borderRadius: 16, padding: '22px 26px',
-        display: 'grid',
-        gridTemplateColumns: '1fr auto auto auto',
-        gap: 24, alignItems: 'center',
+        borderRadius: 16, padding: isMobile ? '18px 20px' : '22px 26px',
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 14 : 24,
+        alignItems: isMobile ? 'flex-start' : 'center',
         position: 'relative', overflow: 'hidden',
         boxShadow: hovered
           ? `0 12px 40px -8px rgba(42,31,46,0.14), 0 2px 8px rgba(42,31,46,0.06)`
@@ -397,7 +398,8 @@ function JobCard({ job, bookmarked, onBookmark, showSalary, showDepartment, show
         transition: 'opacity 0.2s, width 0.2s',
       }} />
 
-      <div style={{ position: 'relative', minWidth: 0 }}>
+      {/* Title + meta — always full width */}
+      <div style={{ position: 'relative', minWidth: 0, flex: 1 }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
           {showDepartment && (
             <span style={{
@@ -437,16 +439,16 @@ function JobCard({ job, bookmarked, onBookmark, showSalary, showDepartment, show
         </div>
 
         <div style={{
-          fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600,
+          fontFamily: 'var(--font-display)', fontSize: isMobile ? 18 : 20, fontWeight: 600,
           letterSpacing: '-0.01em', color: 'var(--ink)', lineHeight: 1.2, marginBottom: 10,
         }}>
           {job.title}
         </div>
 
-        <div style={{ display: 'flex', gap: 18, fontSize: 12, color: 'var(--ink2)', fontFamily: 'var(--font-body)', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 14, fontSize: 12, color: 'var(--ink2)', fontFamily: 'var(--font-body)', flexWrap: 'wrap' }}>
           {showLocation && (
             <span style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-              <PinIcon /> {job.location} · {job.work_mode}
+              <PinIcon /> {job.location}
             </span>
           )}
           <span style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
@@ -458,44 +460,55 @@ function JobCard({ job, bookmarked, onBookmark, showSalary, showDepartment, show
         </div>
       </div>
 
-      {showSalary && (
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink3)', letterSpacing: 1 }}>SALARY</div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, marginTop: 2, color: 'var(--ink)' }}>
-            {job.salary || 'Competitive'}
+      {/* Actions row — inline on desktop, full-width bottom row on mobile */}
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        gap: 10,
+        width: isMobile ? '100%' : undefined,
+        justifyContent: isMobile ? 'space-between' : undefined,
+        flexShrink: 0,
+      }}>
+        {showSalary && (
+          <div style={{ textAlign: isMobile ? 'left' : 'right', flexShrink: 0 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink3)', letterSpacing: 1 }}>SALARY</div>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, marginTop: 2, color: 'var(--ink)' }}>
+              {job.salary || 'Competitive'}
+            </div>
           </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: isMobile ? 'auto' : 0 }}>
+          {allowBookmark && (
+            <button
+              onClick={() => onBookmark(job.id)}
+              style={{
+                background: 'transparent',
+                border: `1px solid ${bookmarked ? toneColor : 'var(--line)'}`,
+                color: bookmarked ? toneColor : 'var(--ink2)',
+                width: 40, height: 40, borderRadius: 99,
+                display: 'grid', placeItems: 'center',
+                cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s',
+              }}
+            >
+              <BookmarkIcon filled={bookmarked} />
+            </button>
+          )}
+
+          <a
+            href={`/jobs/${job.id}`}
+            style={{
+              fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
+              color: hovered ? 'var(--ink)' : 'var(--paper)',
+              background: hovered ? toneColor : 'var(--ink)',
+              border: 'none', borderRadius: 99, padding: '9px 18px',
+              cursor: 'pointer', textDecoration: 'none', letterSpacing: '-0.01em',
+              flexShrink: 0, transition: 'all 0.2s', whiteSpace: 'nowrap',
+            }}
+          >
+            View →
+          </a>
         </div>
-      )}
-
-      {allowBookmark && (
-        <button
-          onClick={() => onBookmark(job.id)}
-          style={{
-            background: 'transparent',
-            border: `1px solid ${bookmarked ? toneColor : 'var(--line)'}`,
-            color: bookmarked ? toneColor : 'var(--ink2)',
-            width: 40, height: 40, borderRadius: 99,
-            display: 'grid', placeItems: 'center',
-            cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s',
-          }}
-        >
-          <BookmarkIcon filled={bookmarked} />
-        </button>
-      )}
-
-      <a
-        href={`/jobs/${job.id}`}
-        style={{
-          fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
-          color: hovered ? 'var(--ink)' : 'var(--paper)',
-          background: hovered ? toneColor : 'var(--ink)',
-          border: 'none', borderRadius: 99, padding: '9px 18px',
-          cursor: 'pointer', textDecoration: 'none', letterSpacing: '-0.01em',
-          flexShrink: 0, transition: 'all 0.2s', whiteSpace: 'nowrap',
-        }}
-      >
-        View →
-      </a>
+      </div>
     </div>
   );
 }
@@ -516,10 +529,12 @@ export default function JobList({ blok }) {
   const rawTags = blok?.popular_tags || 'ML Engineer\nStaff+\nRemote EMEA\nReturnship\nNew grad';
   const popularTags = rawTags.split('\n').map(t => t.trim()).filter(Boolean);
 
-  const [search, setSearch] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    return new URLSearchParams(window.location.search).get('q') || '';
-  });
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) setSearch(q);
+  }, []);
   const [disciplines, setDisciplines] = useState([]);
   const [locations, setLocations] = useState([]);
   const [seniorities, setSeniorities] = useState([]);
@@ -870,6 +885,7 @@ export default function JobList({ blok }) {
                 allowBookmark={allowBookmark}
                 hovered={hoveredId === job.id}
                 onHover={setHoveredId}
+                isMobile={isMobile}
               />
             ))}
           </div>
