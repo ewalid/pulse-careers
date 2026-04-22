@@ -24,7 +24,11 @@ export default function EditorialLifestyle({ blok }) {
   const quoteRole = blok?.quote_role || 'Staff Engineer · 6th year · Singapore';
   const featureLocation = blok?.feature_location || 'Lisbon Studio, PT';
   const featureCaption = blok?.feature_caption || '240 people · open since 2023';
+  const featureImageSrc = blok?.feature_image?.filename;
+  const avatarSrc = blok?.quote_author_avatar?.filename;
   const benefits = blok?.benefits?.length ? blok.benefits : DEFAULT_BENEFITS;
+
+  const initials = quoteAuthor.split(' ').map(w => w[0]).slice(0, 2).join('');
 
   return (
     <section {...storyblokEditable(blok)} style={{ background: 'var(--paper2)', borderBottom: '1px solid var(--line2)', padding: isMobile ? '56px 20px' : '80px 48px' }}>
@@ -37,12 +41,16 @@ export default function EditorialLifestyle({ blok }) {
           gap: 20,
           marginBottom: 20,
         }}>
-          {/* Feature image placeholder */}
+          {/* Feature image */}
           <div style={{
             borderRadius: 20, overflow: 'hidden', position: 'relative',
             minHeight: isMobile ? 240 : 380,
-            background: '#FFD6C8',
-            backgroundImage: 'repeating-linear-gradient(135deg, transparent 0 12px, rgba(255,122,92,0.15) 12px 13px)',
+            background: featureImageSrc ? '#000' : '#FFD6C8',
+            backgroundImage: featureImageSrc
+              ? `url(${featureImageSrc})`
+              : 'repeating-linear-gradient(135deg, transparent 0 12px, rgba(255,122,92,0.15) 12px 13px)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
           }}>
             <div style={{
               position: 'absolute', bottom: 20, left: 20, right: 20,
@@ -60,7 +68,6 @@ export default function EditorialLifestyle({ blok }) {
             display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
             position: 'relative', overflow: 'hidden',
           }}>
-            {/* Neon blob */}
             <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(127,212,193,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
             <div>
@@ -76,9 +83,13 @@ export default function EditorialLifestyle({ blok }) {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#7FD4C1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--ink)', flexShrink: 0 }}>
-                {quoteAuthor.split(' ').map(w => w[0]).slice(0, 2).join('')}
-              </div>
+              {avatarSrc ? (
+                <img src={avatarSrc} alt={quoteAuthor} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#7FD4C1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--ink)', flexShrink: 0 }}>
+                  {initials}
+                </div>
+              )}
               <div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, color: 'var(--paper)' }}>{quoteAuthor}</div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>{quoteRole}</div>
@@ -102,7 +113,7 @@ export default function EditorialLifestyle({ blok }) {
             const tone = TONE_MAP[accentKey] || TONE_MAP.coral;
 
             return (
-              <div key={i} style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid var(--line2)', background: 'var(--paper)' }}>
+              <div key={i} {...storyblokEditable(b)} style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid var(--line2)', background: 'var(--paper)' }}>
                 <div style={{ height: 4, background: tone.accent }} />
                 <div style={{ padding: '18px 16px' }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 18, color: tone.accent, marginBottom: 8, lineHeight: 1 }}>{icon}</div>

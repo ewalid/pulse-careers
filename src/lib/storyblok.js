@@ -51,6 +51,7 @@ export const getStoryblokApi = storyblokInit({
 		brand_cta: BrandCta,
 		value_item: () => null,
 		benefit_item: () => null,
+		editorial_image: () => null,
 	},
 	apiOptions: {
 		region: process.env.STORYBLOK_REGION || 'eu',

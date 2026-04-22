@@ -54,6 +54,7 @@ export default function ValuesBlock({ blok }) {
             return (
               <div
                 key={i}
+                {...storyblokEditable(v)}
                 style={{
                   borderRadius: 16, overflow: 'hidden',
                   border: '1px solid var(--line2)',
