@@ -108,7 +108,7 @@ export default function EditorialHero({ blok }) {
 
   const eyebrow = blok?.eyebrow || 'Issue 14  ·  Spring 2026  ·  Life at Pulse';
   const headline = blok?.headline || 'Warm machines,\ncareful humans.';
-  const accentWord = blok?.headline_accent;
+  const accentWords = [blok?.headline_accent, blok?.headline_accent_2];
   const subheading = blok?.subheading || "Pulse is 2,400 people across seven cities, building the infrastructure behind models you'll use every day without noticing. This is a field guide to what it's like inside.";
   const readTime = blok?.read_time || '8 min read';
   const author = blok?.author || 'Written by the team';
@@ -155,13 +155,14 @@ export default function EditorialHero({ blok }) {
             }}>
               {lines.map((line, i) => {
                 const accentColor = LINE_ACCENTS[i] || LINE_ACCENTS[0];
+                const accent = accentWords[i];
 
-                // If an accent word is set and it appears in this line, use it
-                if (accentWord && line.includes(accentWord)) {
-                  const parts = line.split(accentWord);
+                // If an accent word is set and appears in this line, use it
+                if (accent && line.includes(accent)) {
+                  const parts = line.split(accent);
                   return (
                     <span key={i} style={{ display: 'block' }}>
-                      {parts[0]}<em style={{ fontStyle: 'italic', color: accentColor }}>{accentWord}</em>{parts[1]}
+                      {parts[0]}<em style={{ fontStyle: 'italic', color: accentColor }}>{accent}</em>{parts.slice(1).join(accent)}
                     </span>
                   );
                 }
