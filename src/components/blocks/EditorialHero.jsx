@@ -58,7 +58,12 @@ function MainImageCell({ img, isMobile }) {
       {/* Bottom label */}
       {label && (
         <div style={{ position: 'absolute', bottom: 16, left: 16 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1.5, color: 'rgba(42,31,46,0.6)', textTransform: 'uppercase' }}>{label}</span>
+          <span style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase',
+            color: '#fff',
+            background: 'rgba(42,31,46,0.6)', backdropFilter: 'blur(8px)',
+            borderRadius: 6, padding: '4px 8px',
+          }}>{label}</span>
         </div>
       )}
     </div>
