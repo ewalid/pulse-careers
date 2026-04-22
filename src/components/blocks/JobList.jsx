@@ -7,7 +7,22 @@ import { accentHeadline } from '@/lib/accentHeadline';
 import { useSavedJobs } from '@/lib/SavedJobsContext';
 import SearchAIBanner from '@/components/SearchAIBanner';
 
+export const MOCK_QUERY = "5 years in software engineering, Master's in CS — looking to move into a customer-facing or Developer Relations role";
+
 const SUGGESTION_RULES = [
+  {
+    key: 'customer-facing',
+    tone: 'violet',
+    test: (q) => /\b(customer.fac|devrel|developer.rel|solutions.eng|account.man|customer.suc|facing.role|facing\s+or|cs.+looking|master.+looking|tech.+customer)\b/i.test(q)
+      || (q.length > 30 && /customer|devrel|developer rel|solutions|account/i.test(q)),
+    filter: (jobs) => jobs.filter(j => /solutions|developer rel|devrel|customer success|account manager/i.test(j.title)),
+    defaultSuggestion: {
+      ai_name: 'Pulse AI',
+      tone: 'violet',
+      headline: 'Your engineering depth is exactly what customer-facing teams are hiring for.',
+      body: "Companies at Pulse's scale don't just want people who can present a demo — they need engineers who can debug a customer's integration live, architect a proof-of-concept on the spot, and speak peer-to-peer with a CTO. Five years of engineering and a CS master's is a rare combination in these roles. Most candidates either have the technical depth without the customer instinct, or the relationship skills without the credibility. The three roles below are the ones where your background is a genuine edge, not just a checkbox.",
+    },
+  },
   {
     key: 'biotech-pm',
     tone: 'coral',
@@ -530,11 +545,29 @@ export default function JobList({ blok }) {
   const popularTags = rawTags.split('\n').map(t => t.trim()).filter(Boolean);
 
   const [search, setSearch] = useState('');
+  const searchFocusedRef = useRef(false);
+  const autoFillDoneRef = useRef(false);
+  const typewriterRef = useRef(null);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get('q');
     if (q) setSearch(q);
   }, []);
+
+  function startTypewriter() {
+    if (autoFillDoneRef.current) return;
+    autoFillDoneRef.current = true;
+    handleSearch('');
+    let i = 0;
+    typewriterRef.current = setInterval(() => {
+      i++;
+      handleSearch(MOCK_QUERY.slice(0, i));
+      if (i >= MOCK_QUERY.length) clearInterval(typewriterRef.current);
+    }, 28);
+  }
+
+  useEffect(() => () => clearInterval(typewriterRef.current), []);
+
   const [disciplines, setDisciplines] = useState([]);
   const [locations, setLocations] = useState([]);
   const [seniorities, setSeniorities] = useState([]);
@@ -680,8 +713,19 @@ export default function JobList({ blok }) {
                 <input
                   type="text"
                   value={search}
-                  onChange={e => handleSearch(e.target.value)}
                   placeholder="Search roles, teams, skills…"
+                  onFocus={() => { searchFocusedRef.current = true; }}
+                  onBlur={() => { searchFocusedRef.current = false; }}
+                  onClick={() => {
+                    if (searchFocusedRef.current && !autoFillDoneRef.current) startTypewriter();
+                  }}
+                  onChange={e => {
+                    if (!autoFillDoneRef.current) {
+                      startTypewriter();
+                    } else {
+                      handleSearch(e.target.value);
+                    }
+                  }}
                   style={{
                     flex: 1, border: 'none', outline: 'none', background: 'transparent',
                     fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink)', padding: '12px 0',
