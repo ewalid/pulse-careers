@@ -4,6 +4,7 @@ import { storyblokEditable } from '@storyblok/react/rsc';
 import { JOBS, timeAgo } from '@/lib/ats-mock';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
+import { resolveLink } from '@/lib/resolveLink';
 
 const TONE_MAP = {
   coral:  { bg: '#FFD6C8', stripe: 'rgba(255,122,92,0.2)', accent: '#FF7A5C',  btn: '#FF7A5C',  btnText: '#fff' },
@@ -147,7 +148,7 @@ export default function JobSuggestions({ blok }) {
   const headlineAccent = blok?.headline_accent_word || 'worth a look';
   const subtitle = blok?.subtitle || 'Curated weekly by the talent team · 247 open roles in total';
   const ctaLabel = blok?.cta_label || 'All 247 roles';
-  const ctaUrl = blok?.cta_url || '/jobs';
+  const ctaUrl = resolveLink(blok?.cta_url) || '/jobs';
 
   const jobsById = Object.fromEntries(JOBS.map(j => [j.id, j]));
   const picks = EDITORIAL_PICKS.map(p => ({ pick: p, job: jobsById[p.jobId] })).filter(({ job }) => !!job);

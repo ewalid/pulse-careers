@@ -2,6 +2,7 @@
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
+import { resolveLink } from '@/lib/resolveLink';
 
 const ACCENT_COLORS = { coral: '#FF7A5C', mint: '#7FD4C1', amber: '#F4B942' };
 
@@ -20,7 +21,7 @@ export default function EmployeeStories({ blok }) {
   const stories = blok?.stories?.length > 0 ? blok.stories : DEFAULT_STORIES;
   const ctaIntro = blok?.cta_intro || 'READ 42 MORE STORIES — VIDEO, AUDIO, WRITTEN';
   const ctaLabel = blok?.cta_label || 'Pulse Stories →';
-  const ctaUrl = blok?.cta_url || '#';
+  const ctaUrl = resolveLink(blok?.cta_url) || '#';
 
   return (
     <section {...storyblokEditable(blok)} style={{ background: 'var(--paper)', padding: isMobile ? '48px 20px' : '80px 48px' }}>

@@ -3,6 +3,7 @@ import { storyblokEditable } from '@storyblok/react/rsc';
 import { renderRichText } from '@storyblok/react';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
+import { resolveLink } from '@/lib/resolveLink';
 
 const STAT_ACCENTS = ['#FF7A5C', '#F4B942', '#7FD4C1', '#9B7FD4'];
 
@@ -113,7 +114,7 @@ function HudCard({ blok, isMobile, tone }) {
             </span>
           </div>
           {blok?.media_cta_label && (
-            <a href={blok?.media_cta_url || '#'} style={{
+            <a href={resolveLink(blok?.media_cta_url) || '#'} style={{
               fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1,
               color: 'rgba(244,237,225,0.55)', textDecoration: 'none',
               background: 'rgba(244,237,225,0.08)', borderRadius: 99,
@@ -169,7 +170,7 @@ export default function WhoWeAre({ blok }) {
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         {(blok?.cta_label || !blok?.cta_url) && (
-          <a href={blok?.cta_url || '#'} style={{
+          <a href={resolveLink(blok?.cta_url) || '#'} style={{
             display: 'inline-flex', alignSelf: 'flex-start',
             fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600,
             color: 'var(--paper)', background: 'var(--ink)', textDecoration: 'none',
@@ -179,7 +180,7 @@ export default function WhoWeAre({ blok }) {
           </a>
         )}
         {(blok?.cta_2_label || !blok?.cta_2_url) && (
-          <a href={blok?.cta_2_url || '#'} style={{
+          <a href={resolveLink(blok?.cta_2_url) || '#'} style={{
             display: 'inline-flex', alignSelf: 'flex-start',
             fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 500,
             color: 'var(--ink)', background: 'transparent', textDecoration: 'none',
