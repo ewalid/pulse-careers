@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { JOBS, timeAgo } from '@/lib/ats-mock';
 import { useIsMobile } from '@/lib/useIsMobile';
+import { useSavedJobs } from '@/lib/SavedJobsContext';
 
 const TONE_MAP = {
   coral:  { bg: '#FFD6C8', accent: '#FF7A5C', light: 'rgba(255,122,92,0.08)' },
@@ -108,7 +109,8 @@ export default function JobDetail({ job, blok }) {
   const leftColRef = useRef(null);
 
   const [salary, setSalary] = useState(salaryRange.mid);
-  const [saved, setSaved] = useState(false);
+  const { isSaved, toggleSave } = useSavedJobs();
+  const saved = isSaved(job.id);
   const [processStep, setProcessStep] = useState(0);
   const [teamIdx, setTeamIdx] = useState(0);
   const [applicants, setApplicants] = useState(174);
@@ -142,7 +144,6 @@ export default function JobDetail({ job, blok }) {
   const equity = Math.round(salary * 0.18);
   const signOn = Math.round(salary * 0.12);
   const total = salary + equity + signOn;
-  const labelColors = ['#FF7A5C', '#C9901A', '#2A7A6B', '#6B4FA8', '#FF7A5C'];
 
   const titleParts = job.title.split(', ');
 
@@ -217,62 +218,69 @@ export default function JobDetail({ job, blok }) {
               ))}
             </div>
 
-            {/* Live applicants bar */}
-            <div style={{
-              background: 'var(--paper2)', borderRadius: 12, padding: '11px 16px',
-              border: '1px solid var(--line2)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF7A5C', flexShrink: 0, animation: 'pulseAnim 2s infinite' }} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink)', letterSpacing: 0.5 }}>{applicants} applicants</span>
-              </div>
-              <div style={{ flex: 1, minWidth: 100, height: 3, background: 'var(--line)', borderRadius: 99, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: '62%', background: 'linear-gradient(90deg, #7FD4C1, #F4B942, #FF7A5C)' }} />
-              </div>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#2A7A6B', letterSpacing: 0.5, flexShrink: 0 }}>2 shortlisted today</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink3)', letterSpacing: 0.5, flexShrink: 0 }}>14 days to close</span>
-            </div>
           </div>
 
-          {/* Compact Comp Calculator */}
+          {/* Combined: Comp Calculator + Applicants + Impact */}
           {showCompCalc && (
             <RevealSection scrollRoot={leftColRef}>
-              <div style={{ background: 'var(--ink)', borderRadius: 16, padding: '20px 24px', marginBottom: 36, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ background: 'var(--ink)', borderRadius: 16, padding: isMobile ? '18px' : '20px 28px', marginBottom: 36, position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(244,185,66,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-                  {/* Label + slider */}
-                  <div style={{ flex: '1 1 200px' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: '#7FD4C1', marginBottom: 4, textTransform: 'uppercase' }}>Comp calculator</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--paper)', letterSpacing: '-0.02em' }}>€{salary}k</span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 0.5 }}>base</span>
+                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 20 : 0, alignItems: isMobile ? 'stretch' : 'center' }}>
+
+                  {/* Comp section */}
+                  <div style={{ flex: '2 1 0', paddingRight: isMobile ? 0 : 28 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: '#7FD4C1', marginBottom: 8, textTransform: 'uppercase' }}>Comp calculator</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, color: 'var(--paper)', letterSpacing: '-0.02em' }}>€{salary}k</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>base</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: '0 2px' }}>→</span>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, color: '#FF7A5C', letterSpacing: '-0.02em' }}>€{total}k</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>total</span>
                     </div>
-                    <div style={{ position: 'relative', height: 20, display: 'flex', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', height: 20, display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                       <div style={{ position: 'absolute', left: 0, right: 0, height: 3, borderRadius: 99, background: `linear-gradient(90deg, #7FD4C1 0%, #F4B942 ${((salary - salaryRange.min) / (salaryRange.max - salaryRange.min)) * 100}%, rgba(255,255,255,0.1) ${((salary - salaryRange.min) / (salaryRange.max - salaryRange.min)) * 100}%)` }} />
                       <input type="range" min={salaryRange.min} max={salaryRange.max} value={salary} onChange={e => setSalary(Number(e.target.value))} style={{ position: 'relative', width: '100%', appearance: 'none', background: 'transparent', cursor: 'pointer', zIndex: 1 }} />
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>€{salaryRange.min}k</span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>€{salaryRange.max}k</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {[
+                        { label: 'Equity', value: `€${equity}k`, color: '#7FD4C1' },
+                        { label: 'Sign-on', value: `€${signOn}k`, color: '#F4B942' },
+                      ].map(({ label, value, color }) => (
+                        <div key={label} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 7, padding: '5px 10px', display: 'flex', gap: 5, alignItems: 'baseline' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>{label}</span>
+                          <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color, letterSpacing: '-0.01em' }}>{value}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* 4 output tiles */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, flex: '2 1 300px' }}>
-                    {[
-                      { label: 'Base', value: `€${salary}k`, color: 'var(--paper)', hi: false },
-                      { label: 'Equity', value: `€${equity}k`, color: '#7FD4C1', hi: false },
-                      { label: 'Sign-on', value: `€${signOn}k`, color: '#F4B942', hi: false },
-                      { label: 'Total', value: `€${total}k`, color: '#FF7A5C', hi: true },
-                    ].map(({ label, value, color, hi }) => (
-                      <div key={label} style={{ background: hi ? 'rgba(255,122,92,0.12)' : 'rgba(255,255,255,0.06)', borderRadius: 10, padding: '10px 10px', border: hi ? '1px solid rgba(255,122,92,0.3)' : '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: 5 }}>{label}</div>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color, letterSpacing: '-0.02em' }}>{value}</div>
-                      </div>
-                    ))}
+                  {!isMobile && <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.08)', marginRight: 28, flexShrink: 0 }} />}
+                  {isMobile && <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />}
+
+                  {/* Applicants section */}
+                  <div style={{ flex: '1 1 0', paddingRight: isMobile ? 0 : 28 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: '#7FD4C1', marginBottom: 8, textTransform: 'uppercase' }}>Applicants</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF7A5C', flexShrink: 0, animation: 'pulseAnim 2s infinite' }} />
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, color: 'var(--paper)', letterSpacing: '-0.02em' }}>{applicants}</span>
+                    </div>
+                    <div style={{ height: 3, background: 'rgba(255,255,255,0.1)', borderRadius: 99, overflow: 'hidden', marginBottom: 6 }}>
+                      <div style={{ height: '100%', width: '62%', background: 'linear-gradient(90deg, #7FD4C1, #F4B942, #FF7A5C)' }} />
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.5 }}>2 shortlisted today · 14 days left</div>
+                  </div>
+
+                  {!isMobile && <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.08)', marginRight: 28, flexShrink: 0 }} />}
+                  {isMobile && <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />}
+
+                  {/* Impact section */}
+                  <div style={{ flex: '1 1 0' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: '#7FD4C1', marginBottom: 8, textTransform: 'uppercase' }}>You'll impact</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: '#F4B942', letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 6 }}>40M</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.5 }}>DAILY ACTIVE USERS</div>
                   </div>
                 </div>
-                <div style={{ marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: 0.3 }}>{benefitsText}</div>
+                <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.18)', letterSpacing: 0.3 }}>{benefitsText}</div>
               </div>
             </RevealSection>
           )}
@@ -281,22 +289,9 @@ export default function JobDetail({ job, blok }) {
           <RevealSection scrollRoot={leftColRef}>
             <div style={{ marginBottom: 40 }}>
               <SectionHeader label="The role" accent={tone.accent} />
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, lineHeight: 1.75, color: 'var(--ink2)', margin: '0 0 20px' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 17, lineHeight: 1.85, color: 'var(--ink2)', margin: 0 }}>
                 {job.job_description}
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                {[
-                  { label: "You'll impact", value: '40M', sub: 'daily users' },
-                  { label: 'Team size', value: (job.org_size || '').split('-')[0] || '10', sub: 'direct org' },
-                  { label: 'Core skills', value: job.skills.length.toString(), sub: 'competencies' },
-                ].map(({ label, value, sub }) => (
-                  <div key={label} style={{ background: 'var(--paper2)', borderRadius: 12, padding: '16px', border: '1px solid var(--line2)' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1.5, color: 'var(--ink3)', textTransform: 'uppercase', marginBottom: 6 }}>{label}</div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: tone.accent, letterSpacing: '-0.03em', lineHeight: 1 }}>{value}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink3)', marginTop: 4 }}>{sub}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           </RevealSection>
 
@@ -304,22 +299,20 @@ export default function JobDetail({ job, blok }) {
           <RevealSection scrollRoot={leftColRef}>
             <div style={{ marginBottom: 40 }}>
               <SectionHeader label="What you'll do" accent={tone.accent} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {(job.responsibilities || []).map((r, i) => (
                   <div key={i} style={{
-                    display: 'flex', gap: 12, alignItems: 'flex-start',
-                    padding: '12px 14px', background: 'var(--paper2)',
-                    borderRadius: 10, border: '1px solid var(--line2)',
+                    display: 'flex', gap: isMobile ? 16 : 28, alignItems: 'flex-start',
+                    padding: '22px 0',
+                    borderTop: i > 0 ? '1px solid var(--line2)' : 'none',
                   }}>
                     <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1,
-                      padding: '3px 7px', borderRadius: 5, flexShrink: 0, marginTop: 2,
-                      background: `${labelColors[i % labelColors.length]}18`,
-                      color: labelColors[i % labelColors.length], textTransform: 'uppercase',
+                      fontFamily: 'var(--font-mono)', fontSize: 13, color: tone.accent,
+                      letterSpacing: '-0.01em', flexShrink: 0, minWidth: 28, paddingTop: 2,
                     }}>
-                      {['Lead', 'Build', 'Partner', 'Mentor', 'Own'][i % 5]}
+                      {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink2)', lineHeight: 1.55 }}>{r}</span>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 17, color: 'var(--ink)', lineHeight: 1.6 }}>{r}</span>
                   </div>
                 ))}
               </div>
@@ -329,62 +322,32 @@ export default function JobDetail({ job, blok }) {
           {/* Section: We're looking for */}
           <RevealSection scrollRoot={leftColRef}>
             <div style={{ marginBottom: 40 }}>
-              <SectionHeader label="We're looking for" accent={tone.accent} />
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
+              <SectionHeader label="What we're looking for" accent={tone.accent} />
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 48 }}>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1.5, color: 'var(--ink3)', textTransform: 'uppercase', marginBottom: 10 }}>Must have</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1.5, color: '#FF7A5C', textTransform: 'uppercase', marginBottom: 20 }}>Must have</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     {(job.must_haves || []).map((r, i) => (
-                      <div key={i} style={{ padding: '10px 12px', borderRadius: 9, border: '1.5px solid rgba(255,122,92,0.2)', background: 'rgba(255,122,92,0.03)', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                        <span style={{ color: '#FF7A5C', fontSize: 12, flexShrink: 0, marginTop: 1 }}>✓</span>
-                        <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink2)', lineHeight: 1.5 }}>{r}</span>
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                        <span style={{ color: '#FF7A5C', fontSize: 16, flexShrink: 0, marginTop: 2, fontWeight: 700 }}>✓</span>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--ink)', lineHeight: 1.55 }}>{r}</span>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1.5, color: 'var(--ink3)', textTransform: 'uppercase', marginBottom: 10 }}>Nice to have</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1.5, color: '#2A7A6B', textTransform: 'uppercase', marginBottom: 20 }}>Nice to have</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     {(job.nice_to_haves || []).map((r, i) => (
-                      <div key={i} style={{ padding: '10px 12px', borderRadius: 9, border: '1.5px solid rgba(127,212,193,0.25)', background: 'rgba(127,212,193,0.03)', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                        <span style={{ color: '#2A7A6B', fontSize: 12, flexShrink: 0, marginTop: 1 }}>◎</span>
-                        <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink2)', lineHeight: 1.5 }}>{r}</span>
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 3 }}>
+                          <circle cx="8" cy="8" r="6.5" stroke="#7FD4C1" strokeWidth="1.5"/>
+                        </svg>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--ink)', lineHeight: 1.55 }}>{r}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-          </RevealSection>
-
-          {/* Section: Skills fit */}
-          <RevealSection scrollRoot={leftColRef}>
-            <div style={{ marginBottom: 48, paddingBottom: 40, borderBottom: '1px solid var(--line2)' }}>
-              <SectionHeader label="Skills fit" accent={tone.accent} />
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 20 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: 42, fontWeight: 700, color: tone.accent, letterSpacing: '-0.04em' }}>92%</span>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink3)' }}>skills match based on your profile</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {job.skills.slice(0, 5).map((skill, i) => {
-                  const userPct = [95, 85, 90, 60, 80][i] ?? 70;
-                  const reqPct = [90, 80, 85, 50, 75][i] ?? 65;
-                  const meets = userPct >= reqPct;
-                  return (
-                    <div key={skill}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
-                        <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{skill}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: meets ? '#2A7A6B' : '#C9901A', letterSpacing: 0.5 }}>
-                          {meets ? '✓ Meets requirement' : '~ Close match'}
-                        </span>
-                      </div>
-                      <div style={{ position: 'relative', height: 7, background: 'var(--line)', borderRadius: 99, overflow: 'visible' }}>
-                        <div style={{ position: 'absolute', left: `${reqPct}%`, top: -3, width: 2, height: 13, background: 'var(--ink3)', borderRadius: 1, zIndex: 2 }} />
-                        <div style={{ height: '100%', width: `${userPct}%`, borderRadius: 99, background: meets ? 'linear-gradient(90deg, #7FD4C1, #FF7A5C)' : 'linear-gradient(90deg, #7FD4C1, #F4B942)' }} />
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           </RevealSection>
@@ -557,14 +520,14 @@ export default function JobDetail({ job, blok }) {
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: '#7FD4C1', marginBottom: 3, textTransform: 'uppercase' }}>Ready?</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, color: 'var(--paper)', letterSpacing: '-0.02em', marginBottom: 6 }}>Apply in<br />3 minutes.</div>
             <p style={{ margin: '0 0 16px', fontFamily: 'var(--font-body)', fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>No cover letter. Upload a résumé or paste LinkedIn. We respond within 24 hours.</p>
-            <button
-              type="button"
+            <a
+              href={`/jobs/${job.id}/apply`}
               onMouseEnter={() => setApplyHover(true)}
               onMouseLeave={() => setApplyHover(false)}
-              style={{ width: '100%', padding: '12px', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, color: '#fff', background: applyHover ? '#ff6040' : '#FF7A5C', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'background 0.15s', marginBottom: 8 }}
-            >Apply now →</button>
+              style={{ width: '100%', padding: '12px', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, color: '#fff', background: applyHover ? '#ff6040' : '#FF7A5C', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'background 0.15s', marginBottom: 8, display: 'block', textAlign: 'center', textDecoration: 'none' }}
+            >Apply now →</a>
             <div style={{ display: 'flex', gap: 7 }}>
-              <button type="button" onClick={() => setSaved(s => !s)} style={{ flex: 1, padding: '8px', fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 500, color: saved ? '#FF7A5C' : 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.07)', border: `1px solid ${saved ? 'rgba(255,122,92,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+              <button type="button" onClick={() => toggleSave(job.id)} style={{ flex: 1, padding: '8px', fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 500, color: saved ? '#FF7A5C' : 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.07)', border: `1px solid ${saved ? 'rgba(255,122,92,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                 <BookmarkIcon filled={saved} /> {saved ? 'Saved' : 'Save'}
               </button>
               <button type="button" style={{ flex: 1, padding: '8px', fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>

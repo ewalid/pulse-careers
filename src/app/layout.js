@@ -5,6 +5,8 @@ import { getStoryblokApi } from '@/lib/storyblok';
 import GlobalNav from '@/components/blocks/GlobalNav';
 import FooterBlock from '@/components/blocks/FooterBlock';
 import JobAlerts from '@/components/blocks/JobAlerts';
+import { SavedJobsProvider } from '@/lib/SavedJobsContext';
+import SavedJobsPanel from '@/components/SavedJobsPanel';
 
 const spaceGrotesk = Space_Grotesk({
 	subsets: ['latin'],
@@ -69,10 +71,13 @@ export default async function RootLayout({ children }) {
 				className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${ibmPlexSans.variable}`}
 			>
 				<body>
-					<GlobalNav blok={headerBlok} />
-					{children}
-					<JobAlerts blok={jobAlertsBlok} />
-					<FooterBlock blok={footerBlok} />
+					<SavedJobsProvider>
+						<GlobalNav blok={headerBlok} />
+						{children}
+						<JobAlerts blok={jobAlertsBlok} />
+						<FooterBlock blok={footerBlok} />
+						<SavedJobsPanel />
+					</SavedJobsProvider>
 				</body>
 			</html>
 		</StoryblokProvider>

@@ -4,6 +4,7 @@ import { storyblokEditable } from '@storyblok/react/rsc';
 import PulseLogo from '@/components/ui/PulseLogo';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { resolveLink } from '@/lib/resolveLink';
+import { useSavedJobs } from '@/lib/SavedJobsContext';
 
 const DEFAULT_NAV_ITEMS = [
   { label: 'Careers', url: '#' },
@@ -16,10 +17,10 @@ const DEFAULT_NAV_ITEMS = [
 export default function GlobalNav({ blok }) {
   const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { savedIds, openPanel } = useSavedJobs();
   const navItems = blok?.nav_items?.length > 0 ? blok.nav_items : DEFAULT_NAV_ITEMS;
   const openRoles = blok?.open_roles_count || '247';
   const jobsUrl = resolveLink(blok?.jobs_url) || '/jobs';
-  const savedJobsUrl = resolveLink(blok?.saved_jobs_url) || '#';
 
   return (
     <header
@@ -97,12 +98,13 @@ export default function GlobalNav({ blok }) {
               </button>
 
               {/* Saved jobs */}
-              <a
-                href={savedJobsUrl}
+              <button
+                onClick={openPanel}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 5,
                   fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink2)',
-                  textDecoration: 'none', transition: 'color 0.15s',
+                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  transition: 'color 0.15s', position: 'relative',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink)'; }}
                 onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink2)'; }}
@@ -111,7 +113,16 @@ export default function GlobalNav({ blok }) {
                   <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                 </svg>
                 Saved jobs
-              </a>
+                {savedIds.length > 0 && (
+                  <span style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
+                    background: '#FF7A5C', color: '#fff', borderRadius: 99,
+                    padding: '1px 5px', letterSpacing: 0.5, lineHeight: 1.6,
+                  }}>
+                    {savedIds.length}
+                  </span>
+                )}
+              </button>
 
               <div style={{ width: 1, height: 18, background: 'var(--line)', flexShrink: 0 }} />
 
@@ -161,19 +172,28 @@ export default function GlobalNav({ blok }) {
               </a>
             ))}
           </nav>
-          <a
-            href={savedJobsUrl}
+          <button
+            onClick={() => { setMenuOpen(false); openPanel(); }}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16,
               fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink2)',
-              textDecoration: 'none',
+              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
             </svg>
             Saved jobs
-          </a>
+            {savedIds.length > 0 && (
+              <span style={{
+                fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
+                background: '#FF7A5C', color: '#fff', borderRadius: 99,
+                padding: '1px 5px', letterSpacing: 0.5,
+              }}>
+                {savedIds.length}
+              </span>
+            )}
+          </button>
         </div>
       )}
     </header>

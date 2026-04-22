@@ -1,10 +1,10 @@
 'use client';
-import { useState } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { JOBS, timeAgo } from '@/lib/ats-mock';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
 import { resolveLink } from '@/lib/resolveLink';
+import { useSavedJobs } from '@/lib/SavedJobsContext';
 
 const TONE_MAP = {
   coral:  { bg: '#FFD6C8', stripe: 'rgba(255,122,92,0.2)', accent: '#FF7A5C',  btn: '#FF7A5C',  btnText: '#fff' },
@@ -54,7 +54,8 @@ function BookmarkIcon({ filled }) {
 
 function EditorialCard({ pick, job }) {
   const tone = TONE_MAP[pick.tone];
-  const [saved, setSaved] = useState(false);
+  const { isSaved, toggleSave } = useSavedJobs();
+  const saved = isSaved(job.id);
 
   return (
     <div style={{
@@ -110,7 +111,7 @@ function EditorialCard({ pick, job }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
-              onClick={() => setSaved(s => !s)}
+              onClick={() => toggleSave(job.id)}
               style={{
                 width: 36, height: 36, borderRadius: 10,
                 border: `1px solid ${saved ? tone.accent : 'var(--line)'}`,
