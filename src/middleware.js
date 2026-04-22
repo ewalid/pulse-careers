@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
 
+// Middleware is intentionally a no-op — homepage personalization is handled
+// client-side in HeroBlock via usePersonalization (headline + suggestion chips).
+// Full story rewrites caused discipline card images to break on variant stories.
 export function middleware(request) {
-  const { pathname } = request.nextUrl;
-  if (pathname !== '/') return NextResponse.next();
-
-  const segment = request.cookies.get('pulse_segment')?.value;
-  if (!segment) return NextResponse.next();
-
-  const url = request.nextUrl.clone();
-  url.pathname = `/${segment}`;
-  return NextResponse.rewrite(url);
+  return NextResponse.next();
 }
 
 export const config = { matcher: ['/'] };
