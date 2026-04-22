@@ -86,7 +86,7 @@ export default function EditorialLifestyle({ blok }) {
                 letterSpacing: '-0.01em',
               }}>
                 {pullQuoteHtml
-                  ? <span dangerouslySetInnerHTML={{ __html: pullQuoteHtml }} />
+                  ? <span suppressHydrationWarning dangerouslySetInnerHTML={{ __html: pullQuoteHtml }} />
                   : pullQuotePlain}
               </p>
             </div>
