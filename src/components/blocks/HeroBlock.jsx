@@ -5,11 +5,11 @@ import NeonBlob from '@/components/ui/NeonBlob';
 import { useIsMobile } from '@/lib/useIsMobile';
 
 const DISCIPLINE_CHIPS = [
-  { label: 'Eng', count: 94 },
-  { label: 'AI', count: 47 },
-  { label: 'Ops', count: 41 },
-  { label: 'Data', count: 38 },
-  { label: 'Design', count: 27 },
+  { label: 'Eng',    count: 94, discipline: 'Engineering' },
+  { label: 'AI',     count: 47, discipline: 'AI & Research' },
+  { label: 'Ops',    count: 41, discipline: 'Operations' },
+  { label: 'Data',   count: 38, discipline: 'Data Science' },
+  { label: 'Design', count: 27, discipline: 'Design' },
 ];
 
 const HEADLINE_SIZES = { sm: '52px', md: '72px', lg: '96px', xl: '120px' };
@@ -234,10 +234,22 @@ export default function HeroBlock({ blok }) {
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'rgba(244,237,225,0.55)', fontWeight: 400 }}>open roles</span>
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {DISCIPLINE_CHIPS.map(({ label, count }) => (
-                  <div key={label} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, padding: '4px 9px', background: 'rgba(244,237,225,0.12)', borderRadius: '99px', letterSpacing: 0.5, color: '#F4EDE1' }}>
+                {DISCIPLINE_CHIPS.map(({ label, count, discipline }) => (
+                  <a
+                    key={label}
+                    href={`/jobs?d=${encodeURIComponent(discipline)}`}
+                    style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 10, padding: '4px 9px',
+                      background: 'rgba(244,237,225,0.12)', borderRadius: '99px',
+                      letterSpacing: 0.5, color: '#F4EDE1', textDecoration: 'none',
+                      cursor: 'pointer', transition: 'background 0.15s',
+                      display: 'inline-block',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,237,225,0.22)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(244,237,225,0.12)'; }}
+                  >
                     {label} <b style={{ color: '#FF7A5C' }}>{count}</b>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>}
