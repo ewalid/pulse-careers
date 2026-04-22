@@ -1,5 +1,6 @@
 'use client';
 import { storyblokEditable } from '@storyblok/react/rsc';
+import { renderRichText } from '@storyblok/react';
 import { useIsMobile } from '@/lib/useIsMobile';
 
 const TONE_MAP = {
@@ -19,7 +20,13 @@ const DEFAULT_BENEFITS = [
 export default function EditorialLifestyle({ blok }) {
   const isMobile = useIsMobile();
 
-  const pullQuote = blok?.pull_quote || "I have never once felt like I had to choose between doing good work and having a life. Pulse is the first place that made that feel real, not just written on a wall.";
+  const pullQuoteRaw = blok?.pull_quote;
+  const pullQuoteHtml = pullQuoteRaw && typeof pullQuoteRaw === 'object'
+    ? renderRichText(pullQuoteRaw)
+    : null;
+  const pullQuotePlain = typeof pullQuoteRaw === 'string'
+    ? pullQuoteRaw
+    : "I have never once felt like I had to choose between doing good work and having a life. Pulse is the first place that made that feel real, not just written on a wall.";
   const quoteAuthor = blok?.quote_author || 'Hana Okafor';
   const quoteRole = blok?.quote_role || 'Staff Engineer · 6th year · Singapore';
   const featureLocation = blok?.feature_location || 'Lisbon Studio, PT';
@@ -45,10 +52,10 @@ export default function EditorialLifestyle({ blok }) {
           <div style={{
             borderRadius: 20, overflow: 'hidden', position: 'relative',
             minHeight: isMobile ? 240 : 380,
-            background: featureImageSrc ? '#000' : '#FFD6C8',
             backgroundImage: featureImageSrc
               ? `url(${featureImageSrc})`
               : 'repeating-linear-gradient(135deg, transparent 0 12px, rgba(255,122,92,0.15) 12px 13px)',
+            backgroundColor: featureImageSrc ? '#000' : '#FFD6C8',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}>
@@ -78,7 +85,9 @@ export default function EditorialLifestyle({ blok }) {
                 fontWeight: 500, color: 'var(--paper)', lineHeight: 1.45,
                 letterSpacing: '-0.01em',
               }}>
-                {pullQuote}
+                {pullQuoteHtml
+                  ? <span dangerouslySetInnerHTML={{ __html: pullQuoteHtml }} />
+                  : pullQuotePlain}
               </p>
             </div>
 
