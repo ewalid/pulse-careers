@@ -1,6 +1,7 @@
 import { getJobById } from '@/lib/ats-mock';
 import { getStoryblokApi } from '@/lib/storyblok';
 import JobDetail from '@/components/blocks/JobDetail';
+import JobViewTracker from '@/components/JobViewTracker';
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
@@ -19,5 +20,10 @@ export default async function JobPage({ params }) {
     blok = data.story.content;
   } catch {}
 
-  return <JobDetail job={job} blok={blok} />;
+  return (
+    <>
+      <JobViewTracker category={job.job_category} />
+      <JobDetail job={job} blok={blok} />
+    </>
+  );
 }

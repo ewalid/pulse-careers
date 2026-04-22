@@ -7,6 +7,8 @@ import { accentHeadline } from '@/lib/accentHeadline';
 import { useSavedJobs } from '@/lib/SavedJobsContext';
 import SearchAIBanner from '@/components/SearchAIBanner';
 import JobCard, { TONE_COLORS } from '@/components/JobCard';
+import { usePersonalization } from '@/lib/usePersonalization';
+import { resetProfile } from '@/lib/userProfile';
 
 export const MOCK_QUERY = "5 years as a software engineer, looking to transition into product management or anywhere my engineering background becomes the advantage";
 
@@ -352,6 +354,7 @@ function SidebarContent({ disciplines, setDisciplines, locations, setLocations, 
 
 export default function JobList({ blok }) {
   const isMobile = useIsMobile();
+  const { isReturning, topCategory } = usePersonalization();
 
   const showSalary = blok?.show_salary !== false;
   const showDepartment = blok?.show_department !== false;
@@ -447,6 +450,11 @@ export default function JobList({ blok }) {
   const currentPage = Math.min(page, totalPages);
   const pageJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const activeFilterCount = disciplines.length + locations.length + seniorities.length + employment.length + (salaryStep > 0 ? 1 : 0);
+
+  const pinnedJobs = useMemo(() => {
+    if (!isReturning || !topCategory || heroSuggestionKey || search || disciplines.length || employment.length) return [];
+    return JOBS.filter(j => j.job_category === topCategory).slice(0, 3);
+  }, [isReturning, topCategory, heroSuggestionKey, search, disciplines, employment]);
 
   const activeChips = [
     ...disciplines.map(v => ({ label: v, category: 'DISCIPLINE', color: '#FF7A5C', onRemove: () => { setDisciplines(p => p.filter(x => x !== v)); setPage(1); } })),
@@ -705,6 +713,40 @@ export default function JobList({ blok }) {
               </div>
             )}
           </div>
+
+          {/* Picked for you — personalized pinned row */}
+          {pinnedJobs.length > 0 && (
+            <div style={{ background: 'var(--paper2)', border: '1px solid var(--line2)', borderRadius: 16, padding: '20px 20px 16px', marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1.5, color: '#7FD4C1', textTransform: 'uppercase' }}>
+                  ◉ Based on your browsing · {topCategory}
+                </span>
+                <button
+                  onClick={() => { resetProfile(); window.location.reload(); }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'var(--ink3)', background: 'none', border: '1px solid var(--line2)', borderRadius: 99, padding: '3px 10px', cursor: 'pointer' }}
+                >
+                  ✕ Reset
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {pinnedJobs.map(job => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    bookmarked={isSaved(job.id)}
+                    onBookmark={toggleSave}
+                    showSalary={showSalary}
+                    showDepartment={showDepartment}
+                    showLocation={showLocation}
+                    allowBookmark={allowBookmark}
+                    hovered={hoveredId === job.id}
+                    onHover={setHoveredId}
+                    isMobile={isMobile}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Job cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
