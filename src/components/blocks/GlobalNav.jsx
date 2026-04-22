@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import PulseLogo from '@/components/ui/PulseLogo';
 import { useIsMobile } from '@/lib/useIsMobile';
+import { resolveLink } from '@/lib/resolveLink';
 
 const DEFAULT_NAV_ITEMS = [
   { label: 'Careers', url: '#' },
@@ -17,8 +18,8 @@ export default function GlobalNav({ blok }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navItems = blok?.nav_items?.length > 0 ? blok.nav_items : DEFAULT_NAV_ITEMS;
   const openRoles = blok?.open_roles_count || '247';
-  const jobsUrl = blok?.jobs_url || '/jobs';
-  const savedJobsUrl = blok?.saved_jobs_url || '#';
+  const jobsUrl = resolveLink(blok?.jobs_url) || '/jobs';
+  const savedJobsUrl = resolveLink(blok?.saved_jobs_url) || '#';
 
   return (
     <header
@@ -37,7 +38,7 @@ export default function GlobalNav({ blok }) {
         padding: isMobile ? '14px 20px' : '16px 48px',
       }}>
         {/* Logo */}
-        <PulseLogo size={18} />
+        <PulseLogo size={26} />
 
         {isMobile ? (
           /* Mobile: hamburger */
@@ -61,7 +62,7 @@ export default function GlobalNav({ blok }) {
               {navItems.map((item, i) => (
                 <a
                   key={item._uid || i}
-                  href={item.url || item.link_url || '#'}
+                  href={resolveLink(item.url) || resolveLink(item.link_url) || '#'}
                   style={{
                     fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink3)',
                     textDecoration: 'none', fontWeight: 400,
@@ -147,7 +148,7 @@ export default function GlobalNav({ blok }) {
             {navItems.map((item, i) => (
               <a
                 key={item._uid || i}
-                href={item.url || item.link_url || '#'}
+                href={resolveLink(item.url) || resolveLink(item.link_url) || '#'}
                 onClick={() => setMenuOpen(false)}
                 style={{
                   fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--ink)',

@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { accentHeadline } from '@/lib/accentHeadline';
+import { resolveLink } from '@/lib/resolveLink';
 
 const ACCENT_COLORS = {
   coral: '#FF7A5C',
@@ -130,9 +131,10 @@ function DisciplineCard({ item }) {
     </div>
   );
 
-  if (item.link_url) {
+  const itemHref = resolveLink(item.link_url);
+  if (itemHref) {
     return (
-      <a href={item.link_url} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+      <a href={itemHref} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
         {card}
       </a>
     );
@@ -144,7 +146,7 @@ export default function DisciplineCards({ blok }) {
   const isMobile = useIsMobile();
   const items = (blok?.disciplines?.length > 0) ? blok.disciplines : DEFAULT_DISCIPLINES;
   const ctaLabel = blok?.cta_label || 'All 247 roles';
-  const ctaUrl = blok?.cta_url || '#';
+  const ctaUrl = resolveLink(blok?.cta_url) || '#';
 
   return (
     <section
