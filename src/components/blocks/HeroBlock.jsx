@@ -188,21 +188,20 @@ export default function HeroBlock({ blok }) {
                   style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'var(--font-body)', fontSize: 16, color: '#F4EDE1', lineHeight: 1.5, padding: '4px 0 12px', boxSizing: 'border-box' }}
                 />
 
-                {!isMobile && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'rgba(244,237,225,0.4)', textTransform: 'uppercase', flexShrink: 0 }}>TRY:</span>
-                    {SUGGESTIONS.map(s => (
-                      <button key={s.text} onClick={() => setQuery(s.text)} style={{
-                        fontFamily: 'var(--font-mono)', fontSize: 10, color: s.color,
-                        background: `${s.color}18`, border: `1px solid ${s.color}44`,
-                        borderRadius: '99px', padding: '5px 12px', cursor: 'pointer', whiteSpace: 'nowrap',
-                        transition: 'background 0.15s',
-                      }}>
-                        {s.text}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'nowrap' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'rgba(244,237,225,0.4)', textTransform: 'uppercase', flexShrink: 0 }}>TRY:</span>
+                  {(isMobile ? SUGGESTIONS.slice(0, 2) : SUGGESTIONS).map(s => (
+                    <button key={s.text} onClick={() => setQuery(s.text)} style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 10, color: s.color,
+                      background: `${s.color}18`, border: `1px solid ${s.color}44`,
+                      borderRadius: '99px', padding: '5px 12px', cursor: 'pointer', whiteSpace: 'nowrap',
+                      transition: 'background 0.15s', overflow: 'hidden', textOverflow: 'ellipsis',
+                      maxWidth: isMobile ? '45%' : 'none',
+                    }}>
+                      {s.text}
+                    </button>
+                  ))}
+                </div>
 
                 <div style={{ height: 1, background: 'rgba(244,237,225,0.1)', margin: '0 0 14px' }} />
 
