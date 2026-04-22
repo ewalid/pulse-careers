@@ -33,7 +33,7 @@ function MainImageCell({ img, isMobile }) {
         gridRow: isMobile ? 'auto' : '1 / 3',
         borderRadius: 18, overflow: 'hidden', position: 'relative',
         height: isMobile ? 240 : '100%',
-        background: src ? '#000' : tone.bg,
+        backgroundColor: src ? '#000' : tone.bg,
         backgroundImage: src
           ? `url(${src})`
           : `repeating-linear-gradient(135deg, transparent 0 12px, ${tone.accent}18 12px 13px)`,
@@ -76,7 +76,7 @@ function SmallImageCell({ img, height }) {
       style={{
         borderRadius: 18, overflow: 'hidden', position: 'relative',
         height,
-        background: src ? '#000' : tone.bg,
+        backgroundColor: src ? '#000' : tone.bg,
         backgroundImage: src
           ? `url(${src})`
           : `repeating-linear-gradient(135deg, transparent 0 12px, ${tone.accent}18 12px 13px)`,
