@@ -85,8 +85,13 @@ function SmallImageCell({ img, height }) {
       }}
     >
       {label && (
-        <div style={{ position: 'absolute', bottom: 12, left: 14 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1.5, color: 'rgba(42,31,46,0.55)', textTransform: 'uppercase' }}>{label}</span>
+        <div style={{ position: 'absolute', bottom: 12, left: 12 }}>
+          <span style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase',
+            color: '#fff',
+            background: 'rgba(42,31,46,0.6)', backdropFilter: 'blur(8px)',
+            borderRadius: 6, padding: '4px 8px',
+          }}>{label}</span>
         </div>
       )}
     </div>
