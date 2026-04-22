@@ -47,7 +47,7 @@ export default function HeroVideo({ blok }) {
         >
           {/* Thumbnail */}
           {thumbnailSrc && !playing && (
-            <img src={thumbnailSrc} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${thumbnailSrc})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
           )}
 
           {/* Embedded video */}
